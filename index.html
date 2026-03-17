@@ -1017,14 +1017,28 @@
       position: relative;
       height: 340px;
       background:
-        /* cherry blossom petal scatter */
         radial-gradient(ellipse 60% 40% at 80% 20%, rgba(212,167,140,0.35) 0%, transparent 60%),
         radial-gradient(ellipse 50% 60% at 10% 80%, rgba(86,110,82,0.4) 0%, transparent 55%),
         radial-gradient(ellipse 80% 50% at 50% 50%, rgba(192,100,74,0.15) 0%, transparent 70%),
         linear-gradient(160deg, #3A5236 0%, #2D4A2A 35%, #4A3020 70%, #6B3A24 100%);
+      background-size: cover;
+      background-position: center;
       overflow: hidden;
       flex-shrink: 0;
+      transition: background-image 0.6s ease;
     }
+    .overview-hero.has-photo .overview-hero-overlay {
+      background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%);
+    }
+    .overview-hero-photo-credit {
+      position: absolute;
+      bottom: 8px; right: 12px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      z-index: 3;
+      text-decoration: none;
+    }
+    .overview-hero-photo-credit:hover { color: rgba(255,255,255,0.85); }
 
     /* Decorative circles */
     .overview-hero::before {
@@ -5752,6 +5766,68 @@ e.g. from an e-mail, booking website, or any confirmation document."
     else wxtRenderGrid(data, wxtTripDates());
   }
 
+  /* ─── Hero destination photo (Wikipedia) ────────────────────── */
+  const HERO_PHOTO_CACHE = {};
+
+  async function heroFetchPhoto(trip) {
+    const heroEl = document.getElementById('overviewHero');
+    if (!heroEl) return;
+
+    // Use cached result if available
+    const cacheKey = trip.id;
+    if (HERO_PHOTO_CACHE[cacheKey]) {
+      heroApplyPhoto(heroEl, HERO_PHOTO_CACHE[cacheKey]);
+      return;
+    }
+
+    // Also check trip object itself (persisted across sessions)
+    if (trip.heroPhoto) {
+      HERO_PHOTO_CACHE[cacheKey] = trip.heroPhoto;
+      heroApplyPhoto(heroEl, trip.heroPhoto);
+      return;
+    }
+
+    // Extract a clean place name (strip after comma for "Kyoto & Osaka, Japan" etc.)
+    const query = trip.name.split(',')[0].split('&')[0].trim();
+
+    try {
+      const res  = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+      const data = await res.json();
+      const img  = data.originalimage?.source || data.thumbnail?.source;
+      const page = data.content_urls?.desktop?.page || '';
+      if (img) {
+        const photo = { url: img, credit: data.title, creditUrl: page };
+        HERO_PHOTO_CACHE[cacheKey] = photo;
+        // Persist in trip data so it survives page reload
+        const trips = tripsLoad();
+        const t = trips.find(t => t.id === trip.id);
+        if (t) { t.heroPhoto = photo; tripsSave(trips); }
+        heroApplyPhoto(heroEl, photo);
+      }
+    } catch (e) { /* silently fall back to gradient */ }
+  }
+
+  function heroApplyPhoto(heroEl, photo) {
+    // Preload image before applying
+    const img = new Image();
+    img.onload = () => {
+      heroEl.style.backgroundImage = `url('${photo.url}')`;
+      heroEl.classList.add('has-photo');
+      // Credit link
+      let credit = heroEl.querySelector('.overview-hero-photo-credit');
+      if (!credit) {
+        credit = document.createElement('a');
+        credit.className = 'overview-hero-photo-credit';
+        credit.target = '_blank';
+        credit.rel = 'noopener';
+        heroEl.appendChild(credit);
+      }
+      credit.textContent = `📷 ${photo.credit} — Wikipedia`;
+      credit.href = photo.creditUrl || '#';
+    };
+    img.src = photo.url;
+  }
+
   /* ─── Overview page ─────────────────────────────────────────── */
   function renderOverview() {
     const trip    = tripsLoad().find(t => t.active) || tripsLoad()[0];
@@ -5765,6 +5841,9 @@ e.g. from an e-mail, booking website, or any confirmation document."
     if (!titleEl) return;
 
     titleEl.textContent = trip ? trip.name : '—';
+
+    // Fetch destination photo
+    if (trip?.name) heroFetchPhoto(trip);
 
     // Compute stats from trip dates
     const sep = '–';
