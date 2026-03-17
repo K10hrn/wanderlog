@@ -3408,8 +3408,9 @@
 <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <h3>Plan a New Trip</h3>
-    <p class="modal-sub">Add your destination and travel dates to get started.</p>
+    <h3 id="tripModalTitle">Plan a New Trip</h3>
+    <p class="modal-sub" id="tripModalSub">Add your destination and travel dates to get started.</p>
+    <input type="hidden" id="editTripId" value="" />
     <div class="form-group">
       <label class="form-label">Destination</label>
       <input class="input" type="text" placeholder="e.g. Lisbon, Portugal" id="newDest" />
@@ -3434,7 +3435,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="addTrip()">Create Trip</button>
+      <button class="btn btn-primary" id="tripModalSaveBtn" onclick="saveTripModal()">Create Trip</button>
     </div>
   </div>
 </div>
@@ -4107,6 +4108,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
           <div class="trip-dropdown-dest">${t.name}</div>
           <div class="trip-dropdown-dates">${t.dates}</div>
         </div>
+        <button class="trip-del-btn" onclick="openEditTrip('${t.id}', event)" title="Edit trip" style="opacity:0.5;font-size:13px;">✏️</button>
         <button class="trip-del-btn" onclick="deleteTrip('${t.id}', event)" title="Remove trip">✕</button>
       </div>`).join('');
 
@@ -4984,24 +4986,86 @@ e.g. from an e-mail, booking website, or any confirmation document."
       </div>`;
   }
 
-  /* ─── Trip modal ─────────────────────────────────────────── */
-  function openModal() {
-    document.getElementById('modal').classList.add('open');
-    // Render colour swatches, default to first colour
+  /* ─── Trip modal (create + edit) ─────────────────────────── */
+  function _tripModalSwatches(selectedColor) {
     const wrap = document.getElementById('newTripColorSwatches');
-    if (wrap) {
-      wrap.innerHTML = TRIP_COLORS.map((c, i) =>
-        `<div class="trip-color-swatch${i===0?' selected':''}" style="background:${c}"
-          data-color="${c}" onclick="selectNewTripColor(this)"></div>`
-      ).join('');
-    }
+    if (!wrap) return;
+    wrap.innerHTML = TRIP_COLORS.map(c =>
+      `<div class="trip-color-swatch${c === selectedColor ? ' selected' : ''}" style="background:${c}"
+        data-color="${c}" onclick="selectNewTripColor(this)"></div>`
+    ).join('');
   }
-  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+  function openModal() {
+    // Reset to "create" mode
+    document.getElementById('editTripId').value = '';
+    document.getElementById('tripModalTitle').textContent = 'Plan a New Trip';
+    document.getElementById('tripModalSub').textContent = 'Add your destination and travel dates to get started.';
+    document.getElementById('tripModalSaveBtn').textContent = 'Create Trip';
+    ['newDest','newDesc','newFrom','newTo'].forEach(id => document.getElementById(id).value = '');
+    _tripModalSwatches(TRIP_COLORS[0]);
+    document.getElementById('modal').classList.add('open');
+    setTimeout(() => document.getElementById('newDest')?.focus(), 80);
+  }
+
+  function openEditTrip(id, e) {
+    if (e) e.stopPropagation();
+    closeTripDropdown();
+    const trip = tripsLoad().find(t => t.id === id);
+    if (!trip) return;
+    document.getElementById('editTripId').value = id;
+    document.getElementById('tripModalTitle').textContent = 'Edit Trip';
+    document.getElementById('tripModalSub').textContent = 'Update your trip details.';
+    document.getElementById('tripModalSaveBtn').textContent = 'Save Changes';
+    document.getElementById('newDest').value = trip.name  || '';
+    document.getElementById('newDesc').value = '';
+    document.getElementById('newFrom').value = trip.from  || '';
+    document.getElementById('newTo').value   = trip.to    || '';
+    _tripModalSwatches(trip.color || TRIP_COLORS[0]);
+    document.getElementById('modal').classList.add('open');
+    setTimeout(() => document.getElementById('newDest')?.focus(), 80);
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    document.getElementById('editTripId').value = '';
+  }
   function closeModalOutside(e) { if (e.target.id === 'modal') closeModal(); }
 
   function selectNewTripColor(el) {
     document.querySelectorAll('#newTripColorSwatches .trip-color-swatch').forEach(s => s.classList.remove('selected'));
     el.classList.add('selected');
+  }
+
+  function saveTripModal() {
+    const editId = document.getElementById('editTripId').value;
+    if (editId) { _saveEditTrip(editId); } else { addTrip(); }
+  }
+
+  function _saveEditTrip(id) {
+    const dest = document.getElementById('newDest').value.trim();
+    const from = document.getElementById('newFrom').value;
+    const to   = document.getElementById('newTo').value;
+    if (!dest) { showToast('Please enter a destination.', 'error'); return; }
+    const selected = document.querySelector('#newTripColorSwatches .trip-color-swatch.selected');
+    const color = selected ? selected.dataset.color : TRIP_COLORS[0];
+    const dateStr = from && to
+      ? new Date(from).toLocaleDateString('en-GB', {month:'short', day:'numeric'}) + ' – ' +
+        new Date(to).toLocaleDateString('en-GB', {month:'short', day:'numeric', year:'numeric'})
+      : '—';
+    const trips = tripsLoad();
+    const trip = trips.find(t => t.id === id);
+    if (!trip) return;
+    trip.name  = dest;
+    trip.color = color;
+    trip.from  = from;
+    trip.to    = to;
+    trip.dates = dateStr;
+    tripsSave(trips);
+    tripsRender();
+    renderOverview();
+    closeModal();
+    showToast('Trip updated ✓', 'success');
   }
 
   function addTrip() {
@@ -5023,7 +5087,6 @@ e.g. from an e-mail, booking website, or any confirmation document."
     tripsRender();
     renderOverview();
     closeModal();
-    ['newDest','newDesc','newFrom','newTo'].forEach(id => document.getElementById(id).value = '');
   }
 
   function openColorPopup(tripId, e) {
