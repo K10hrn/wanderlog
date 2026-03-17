@@ -4051,11 +4051,15 @@ e.g. from an e-mail, booking website, or any confirmation document."
   sb.auth.onAuthStateChange(async (event, session) => {
     _sbUser = session?.user ?? null;
     if (_sbUser) {
-      // Pull cloud data into localStorage so app reads it immediately
-      await cloudPull();
+      // Hide overlay immediately so the app feels instant
       authHideOverlay();
       const barEl = document.getElementById('authUserBar');
       if (barEl) barEl.textContent = _sbUser.email;
+      // Pull cloud data in the background — pages re-render when data arrives
+      cloudPull().then(() => {
+        tripsRender();
+        renderPacking();
+      });
     } else {
       authShowOverlay();
     }
