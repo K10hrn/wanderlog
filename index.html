@@ -2772,8 +2772,11 @@
     .lock-overlay {
       position: fixed; inset: 0; z-index: 9999;
       background: var(--bg);
+      min-height: 100dvh;
       display: flex; align-items: center; justify-content: center; padding: 24px;
+      overflow: auto;
     }
+    body.locked { overflow: hidden; }
     .lock-card {
       background: var(--surface); border: 1.5px solid var(--divider);
       border-radius: 20px; padding: 48px 44px 40px;
@@ -3826,11 +3829,13 @@ e.g. from an e-mail, booking website, or any confirmation document."
   function authShowOverlay() {
     const ov = document.getElementById('lockOverlay');
     if (ov) ov.style.display = 'flex';
+    document.body.classList.add('locked');
     setTimeout(() => document.getElementById('authEmail')?.focus(), 80);
   }
   function authHideOverlay() {
     const ov = document.getElementById('lockOverlay');
     if (ov) ov.style.display = 'none';
+    document.body.classList.remove('locked');
   }
 
   /* ── Toggle sign-in ↔ sign-up ────────────────────────────── */
