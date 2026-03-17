@@ -3906,30 +3906,54 @@ e.g. from an e-mail, booking website, or any confirmation document."
     document.getElementById('authUserBar').textContent = '';
   }
 
-  /* ── Pull cloud → localStorage ───────────────────────────── */
+  /* ── Local sync-time tracking ────────────────────────────── */
+  const SYNC_TIMES_KEY = 'wanderlog_sync_times';
+  function getSyncTimes() {
+    try { return JSON.parse(localStorage.getItem(SYNC_TIMES_KEY)) || {}; }
+    catch { return {}; }
+  }
+  function setSyncTime(key) {
+    const times = getSyncTimes();
+    times[key] = new Date().toISOString();
+    localStorage.setItem(SYNC_TIMES_KEY, JSON.stringify(times));
+  }
+
+  /* ── Pull cloud → localStorage ───────────────────────────── *
+   *  Only overwrites a key if:                                  *
+   *   (a) no local copy exists yet, OR                          *
+   *   (b) the cloud record is newer than the last local write   */
   async function cloudPull() {
     if (!_sbUser) return;
     const { data, error } = await sb.from('trip_data')
-      .select('key, value')
+      .select('key, value, updated_at')
       .eq('user_id', _sbUser.id);
     if (error) { console.warn('cloudPull error', error); return; }
     if (data && data.length > 0) {
+      const syncTimes = getSyncTimes();
       data.forEach(row => {
-        localStorage.setItem(row.key, JSON.stringify(row.value));
+        const localTime  = syncTimes[row.key];
+        const cloudTime  = row.updated_at;
+        const hasLocal   = localStorage.getItem(row.key) !== null;
+        // Cloud wins only when there is no local copy or cloud is strictly newer
+        if (!hasLocal || !localTime || cloudTime > localTime) {
+          localStorage.setItem(row.key, JSON.stringify(row.value));
+        }
       });
     }
-    // After pull, re-render active panel so new data is visible immediately
+    // Re-render active panel with latest data
     const activePanel = document.querySelector('.panel.active');
     if (activePanel) {
       const id = activePanel.id.replace('panel-', '');
       const navEl = document.querySelector(`.nav-link[onclick*="'${id}'"]`);
       showPanel(id, navEl);
     }
+    tripsRender();
   }
 
   /* ── Auto-sync one key after every save ─────────────────── */
   function cloudAutoSync(key, value) {
     if (!_sbUser) return;
+    setSyncTime(key); // record local write time before async push
     sb.from('trip_data').upsert({
       user_id:    _sbUser.id,
       key,
