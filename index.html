@@ -5766,54 +5766,58 @@ e.g. from an e-mail, booking website, or any confirmation document."
     else wxtRenderGrid(data, wxtTripDates());
   }
 
-  /* ─── Hero destination photo (Wikipedia) ────────────────────── */
-  const HERO_PHOTO_CACHE = {};
-
-  async function heroFetchPhoto(trip) {
+  /* ─── Hero destination photo ────────────────────────────────── */
+  function heroFetchPhoto(trip) {
     const heroEl = document.getElementById('overviewHero');
     if (!heroEl) return;
 
-    // Use cached result if available
-    const cacheKey = trip.id;
-    if (HERO_PHOTO_CACHE[cacheKey]) {
-      heroApplyPhoto(heroEl, HERO_PHOTO_CACHE[cacheKey]);
-      return;
-    }
-
-    // Also check trip object itself (persisted across sessions)
+    // Use persisted photo URL if already fetched
     if (trip.heroPhoto) {
-      HERO_PHOTO_CACHE[cacheKey] = trip.heroPhoto;
       heroApplyPhoto(heroEl, trip.heroPhoto);
       return;
     }
 
-    // Extract a clean place name (strip after comma for "Kyoto & Osaka, Japan" etc.)
-    const query = trip.name.split(',')[0].split('&')[0].trim();
+    // Clean destination name: "Kyoto & Osaka" → "Kyoto", "Lisbon, Portugal" → "Lisbon Portugal"
+    const query = trip.name
+      .split('&')[0]
+      .replace(/[,]/g, ' ')
+      .trim();
 
-    try {
-      const res  = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-      const data = await res.json();
-      const img  = data.originalimage?.source || data.thumbnail?.source;
-      const page = data.content_urls?.desktop?.page || '';
-      if (img) {
-        const photo = { url: img, credit: data.title, creditUrl: page };
-        HERO_PHOTO_CACHE[cacheKey] = photo;
-        // Persist in trip data so it survives page reload
-        const trips = tripsLoad();
-        const t = trips.find(t => t.id === trip.id);
-        if (t) { t.heroPhoto = photo; tripsSave(trips); }
-        heroApplyPhoto(heroEl, photo);
-      }
-    } catch (e) { /* silently fall back to gradient */ }
+    // Try Wikipedia first for accurate destination images
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`)
+      .then(r => r.json())
+      .then(data => {
+        const imgUrl = data.originalimage?.source || data.thumbnail?.source;
+        if (imgUrl) {
+          const photo = {
+            url: imgUrl,
+            credit: data.title,
+            creditUrl: data.content_urls?.desktop?.page || ''
+          };
+          // Persist so we don't re-fetch on every render
+          const trips = tripsLoad();
+          const t = trips.find(t => t.id === trip.id);
+          if (t) { t.heroPhoto = photo; tripsSave(trips); }
+          heroApplyPhoto(heroEl, photo);
+        } else {
+          heroApplyUnsplash(heroEl, query);
+        }
+      })
+      .catch(() => heroApplyUnsplash(heroEl, query));
+  }
+
+  function heroApplyUnsplash(heroEl, query) {
+    // Fallback: Unsplash Source (no API key, works as CSS background URL)
+    const url = `https://source.unsplash.com/1600x600/?${encodeURIComponent(query + ' travel landscape')}`;
+    heroEl.style.backgroundImage = `url('${url}')`;
+    heroEl.classList.add('has-photo');
   }
 
   function heroApplyPhoto(heroEl, photo) {
-    // Preload image before applying
     const img = new Image();
     img.onload = () => {
       heroEl.style.backgroundImage = `url('${photo.url}')`;
       heroEl.classList.add('has-photo');
-      // Credit link
       let credit = heroEl.querySelector('.overview-hero-photo-credit');
       if (!credit) {
         credit = document.createElement('a');
@@ -5822,9 +5826,10 @@ e.g. from an e-mail, booking website, or any confirmation document."
         credit.rel = 'noopener';
         heroEl.appendChild(credit);
       }
-      credit.textContent = `📷 ${photo.credit} — Wikipedia`;
+      credit.textContent = `📷 ${photo.credit} · Wikipedia`;
       credit.href = photo.creditUrl || '#';
     };
+    img.onerror = () => heroApplyUnsplash(heroEl, photo.credit || '');
     img.src = photo.url;
   }
 
