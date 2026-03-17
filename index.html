@@ -5285,10 +5285,13 @@ e.g. from an e-mail, booking website, or any confirmation document."
     if (!confirm('Delete this booking? This cannot be undone.')) return;
     const all = bmGetAll().filter(b => b.id !== bmEditId);
     bmSaveAll(all);
-    closeBookingModal();
     bmEditId = null;
+    closeBookingModal();
     showToast('Booking deleted', 'error');
-    bmSaveAll(all); // trigger live update
+    // Refresh whichever panel is currently active
+    const active = document.querySelector('.nav-btn.active');
+    if (active) active.click();
+    else renderOverview();
   }
 
   /* ─── Toast notification ─────────────────────────────────── */
