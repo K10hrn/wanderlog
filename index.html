@@ -1361,6 +1361,31 @@
       flex-shrink: 0;
     }
 
+    /* Success modal */
+    .success-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1200;
+      background: rgba(0,0,0,0.35); align-items: center; justify-content: center;
+    }
+    .success-modal-overlay.open { display: flex; }
+    .success-modal {
+      background: var(--surface); border-radius: 16px; padding: 32px 28px 24px;
+      max-width: 360px; width: 90%; text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      animation: successPop 0.25s ease;
+    }
+    @keyframes successPop {
+      from { transform: scale(0.88); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .success-icon { font-size: 48px; margin-bottom: 12px; }
+    .success-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .success-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+    .success-detail { background: var(--sand); border-radius: 10px; padding: 12px 14px;
+      text-align: left; margin-bottom: 20px; font-size: 13px; color: var(--text); }
+    .success-detail-row { display: flex; gap: 8px; margin-bottom: 4px; }
+    .success-detail-row:last-child { margin-bottom: 0; }
+    .success-detail-label { color: var(--text-muted); min-width: 72px; }
+
     /* Save confirmation toast */
     .toast {
       position: fixed;
@@ -3407,6 +3432,17 @@
   </div>
 </div>
 
+<!-- ─── Success Modal ────────────────────────────────────── -->
+<div class="success-modal-overlay" id="successModal" onclick="closeSuccessModal()">
+  <div class="success-modal" onclick="event.stopPropagation()">
+    <div class="success-icon">✅</div>
+    <div class="success-title" id="successTitle">Booking Saved!</div>
+    <div class="success-sub" id="successSub"></div>
+    <div class="success-detail" id="successDetail"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="closeSuccessModal()">Done</button>
+  </div>
+</div>
+
 <!-- ─── Add / Edit Booking Modal ─────────────────────────── -->
 <div class="modal-overlay" id="bookingModal" onclick="bookingModalOutside(event)">
   <div class="modal booking-modal">
@@ -5206,10 +5242,36 @@ e.g. from an e-mail, booking website, or any confirmation document."
         updated_at: new Date().toISOString(),
       });
     }
+    const isEdit = !!bmEditId;
     bmSaveAll(all);
     closeBookingModal();
-    showToast(bmEditId ? 'Booking updated ✓' : 'Booking saved ✓');
     bmEditId = null;
+    showBookingSuccess(data, isEdit);
+  }
+
+  function showBookingSuccess(data, isEdit) {
+    const typeLabels = { flight: 'Flight', accommodation: 'Stay', tour_activity: 'Activity', transport: 'Transport', general_event: 'Event' };
+    const typeIcons  = { flight: '✈️', accommodation: '🏨', tour_activity: '🎫', transport: '🚗', general_event: '📌' };
+    const title = data.name || data.airline || data.provider || 'Booking';
+    const rows = [];
+    if (data.date)      rows.push(['Date',   new Date(data.date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})]);
+    if (data.time)      rows.push(['Time',   data.time]);
+    if (data.airline)   rows.push(['Airline', data.airline]);
+    if (data.flightNum) rows.push(['Flight', data.flightNum]);
+    if (data.checkIn)   rows.push(['Check-in', new Date(data.checkIn).toLocaleDateString('en-GB', {day:'numeric',month:'short'})]);
+    if (data.checkOut)  rows.push(['Check-out', new Date(data.checkOut).toLocaleDateString('en-GB', {day:'numeric',month:'short'})]);
+    if (data.location)  rows.push(['Location', data.location]);
+    if (data.confirmation) rows.push(['Ref', data.confirmation]);
+    document.getElementById('successTitle').textContent = isEdit ? 'Booking Updated!' : 'Booking Saved!';
+    document.getElementById('successSub').textContent   = `${typeIcons[bmType] || '📋'} ${typeLabels[bmType] || 'Booking'} — ${title}`;
+    document.getElementById('successDetail').innerHTML  = rows.map(([l,v]) =>
+      `<div class="success-detail-row"><span class="success-detail-label">${l}</span><span>${v}</span></div>`
+    ).join('') || '<div style="color:var(--text-muted)">No additional details</div>';
+    document.getElementById('successModal').classList.add('open');
+  }
+
+  function closeSuccessModal() {
+    document.getElementById('successModal').classList.remove('open');
   }
 
   /* ─── Toast notification ─────────────────────────────────── */
