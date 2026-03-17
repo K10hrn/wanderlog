@@ -4869,6 +4869,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     trips.push({ id: 'trip-' + Date.now(), name: dest, dates: dateStr, color, active: true, from, to });
     tripsSave(trips);
     tripsRender();
+    renderOverview();
     closeModal();
     ['newDest','newDesc','newFrom','newTo'].forEach(id => document.getElementById(id).value = '');
   }
