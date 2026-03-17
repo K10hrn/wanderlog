@@ -370,6 +370,10 @@
     }
     .btn-primary:hover { background: var(--terra-light); transform: translateY(-1px); box-shadow: 0 4px 12px var(--shadow-md); }
 
+    .btn-danger {
+      background: #dc2626; color: #fff; border: none;
+    }
+    .btn-danger:hover { background: #b91c1c; transform: translateY(-1px); }
     .btn-ghost {
       background: transparent;
       color: var(--text-mid);
@@ -3652,6 +3656,7 @@
 
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeBookingModal()">Cancel</button>
+      <button class="btn btn-danger" id="bm-delete-btn" onclick="deleteBooking()" style="display:none;margin-right:auto;">🗑 Delete</button>
       <button class="btn btn-primary" onclick="saveBooking()" id="bm-save-btn">Save Booking</button>
     </div>
   </div>
@@ -5041,6 +5046,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     document.getElementById('bm-title').textContent = isEdit ? 'Edit Booking' : 'Add Booking';
     document.getElementById('bm-sub').textContent   = isEdit ? 'Update the details below.' : 'Choose a type and fill in the details.';
     document.getElementById('bm-save-btn').textContent = isEdit ? 'Save Changes' : 'Save Booking';
+    document.getElementById('bm-delete-btn').style.display = isEdit ? 'inline-flex' : 'none';
 
     if (isEdit) {
       const existing = bmGetBooking(bmEditId);
@@ -5272,6 +5278,17 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   function closeSuccessModal() {
     document.getElementById('successModal').classList.remove('open');
+  }
+
+  function deleteBooking() {
+    if (!bmEditId) return;
+    if (!confirm('Delete this booking? This cannot be undone.')) return;
+    const all = bmGetAll().filter(b => b.id !== bmEditId);
+    bmSaveAll(all);
+    closeBookingModal();
+    bmEditId = null;
+    showToast('Booking deleted', 'error');
+    bmSaveAll(all); // trigger live update
   }
 
   /* ─── Toast notification ─────────────────────────────────── */
