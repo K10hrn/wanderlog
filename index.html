@@ -4132,6 +4132,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     renderOverview();
     if (typeof renderItinerary === 'function') renderItinerary();
     if (typeof renderCalendar  === 'function') renderCalendar();
+    if (typeof renderWeather   === 'function') renderWeather();
   }
 
   function deleteTrip(id, e) {
@@ -5852,8 +5853,12 @@ e.g. from an e-mail, booking website, or any confirmation document."
    *  WEATHER  (Open-Meteo — no API key required)
    * ═══════════════════════════════════════════════════════════════ */
 
-  const WX_KEY      = 'wanderlog_weather';
+  const WX_KEY_BASE = 'wanderlog_weather';
   const WX_CACHE_MS = 60 * 60 * 1000; // 1 hour
+  function wxtTripKey() {
+    const active = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    return WX_KEY_BASE + '_' + (active?.id || 'default');
+  }
 
   // WMO weather interpretation codes → icon + label
   const WX_CODES = {
@@ -5876,11 +5881,11 @@ e.g. from an e-mail, booking website, or any confirmation document."
   /* ── Storage ──────────────────────────────────────────────────── */
   function wxtLoad() {
     try {
-      const d = JSON.parse(localStorage.getItem(WX_KEY) || '{}');
+      const d = JSON.parse(localStorage.getItem(wxtTripKey()) || '{}');
       return { unit: 'C', cities: [], ...d };
     } catch { return { unit: 'C', cities: [] }; }
   }
-  function wxtSave(data) { localStorage.setItem(WX_KEY, JSON.stringify(data)); }
+  function wxtSave(data) { localStorage.setItem(wxtTripKey(), JSON.stringify(data)); }
 
   /* ── Helpers ──────────────────────────────────────────────────── */
   function wxtEsc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
