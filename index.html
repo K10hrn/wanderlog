@@ -208,13 +208,18 @@
     }
     .trip-color-swatch:hover { transform: scale(1.15); }
     .trip-color-swatch.selected { border-color: var(--text); }
-    /* Inline colour swatches inside trip dropdown */
-    .trip-dropdown-colors {
-      display: flex; gap: 5px; margin-top: 6px; padding-top: 6px;
-      border-top: 1px solid var(--border);
+    /* Colour picker popup */
+    .trip-color-dot { cursor: pointer; transition: transform 0.15s; }
+    .trip-color-dot:hover { transform: scale(1.3); }
+    .trip-color-popup {
+      position: fixed; z-index: 9999;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px;
+      display: flex; gap: 6px; flex-wrap: wrap; width: 116px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     }
     .trip-dropdown-swatch {
-      width: 18px; height: 18px; border-radius: 50%; cursor: pointer;
+      width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
       border: 2px solid transparent; transition: border-color 0.15s, transform 0.1s;
       flex-shrink: 0;
     }
@@ -4015,15 +4020,11 @@ e.g. from an e-mail, booking website, or any confirmation document."
     list.innerHTML = trips.map(t => `
       <div class="trip-dropdown-item${t.active ? ' active' : ''}" data-trip-id="${t.id}"
            onclick="switchTrip('${t.id}', event)">
-        <div class="trip-color-dot" style="background:${t.color};"></div>
+        <div class="trip-color-dot" style="background:${t.color};" title="Change colour"
+             onclick="openColorPopup('${t.id}', event)"></div>
         <div style="flex:1;min-width:0;">
           <div class="trip-dropdown-dest">${t.name}</div>
           <div class="trip-dropdown-dates">${t.dates}</div>
-          <div class="trip-dropdown-colors">
-            ${TRIP_COLORS.map(c => `<div class="trip-dropdown-swatch${t.color===c?' active':''}"
-              style="background:${c}" title="Change colour"
-              onclick="changeTripColor('${t.id}','${c}',event)"></div>`).join('')}
-          </div>
         </div>
         <button class="trip-del-btn" onclick="deleteTrip('${t.id}', event)" title="Remove trip">✕</button>
       </div>`).join('');
@@ -4944,6 +4945,34 @@ e.g. from an e-mail, booking website, or any confirmation document."
     ['newDest','newDesc','newFrom','newTo'].forEach(id => document.getElementById(id).value = '');
   }
 
+  function openColorPopup(tripId, e) {
+    e.stopPropagation();
+    closeColorPopup();
+    const dot = e.currentTarget;
+    const rect = dot.getBoundingClientRect();
+    const trips = tripsLoad();
+    const trip = trips.find(t => t.id === tripId);
+    if (!trip) return;
+    const popup = document.createElement('div');
+    popup.className = 'trip-color-popup';
+    popup.id = 'tripColorPopup';
+    popup.innerHTML = TRIP_COLORS.map(c =>
+      `<div class="trip-dropdown-swatch${trip.color===c?' active':''}"
+        style="background:${c}" title="${c}"
+        onclick="changeTripColor('${tripId}','${c}',event)"></div>`
+    ).join('');
+    // Position below the dot
+    popup.style.left = rect.left + 'px';
+    popup.style.top  = (rect.bottom + 6) + 'px';
+    document.body.appendChild(popup);
+    setTimeout(() => document.addEventListener('click', closeColorPopup, { once: true }), 0);
+  }
+
+  function closeColorPopup() {
+    const p = document.getElementById('tripColorPopup');
+    if (p) p.remove();
+  }
+
   function changeTripColor(id, color, e) {
     if (e) e.stopPropagation();
     const trips = tripsLoad();
@@ -4952,6 +4981,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     trip.color = color;
     tripsSave(trips);
     tripsRender();
+    closeColorPopup();
   }
 
   /* ─── Booking modal ──────────────────────────────────────────
