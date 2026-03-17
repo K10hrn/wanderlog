@@ -2777,6 +2777,10 @@
       overflow: auto;
     }
     body.locked { overflow: hidden; }
+    body.locked .navbar,
+    body.locked .mobile-nav,
+    body.locked .panel,
+    body.locked .fab-add { visibility: hidden; pointer-events: none; }
     .lock-card {
       background: var(--surface); border: 1.5px solid var(--divider);
       border-radius: 20px; padding: 48px 44px 40px;
@@ -4012,6 +4016,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
       // Pull cloud data in the background — pages re-render when data arrives
       cloudPull().then(() => {
         tripsRender();
+        renderOverview();
         renderPacking();
       });
     } else {
@@ -5400,10 +5405,12 @@ e.g. from an e-mail, booking website, or any confirmation document."
     bmEditId = null;
     closeBookingModal();
     showToast('Booking deleted', 'error');
-    // Refresh whichever panel is currently active
-    const active = document.querySelector('.nav-btn.active');
-    if (active) active.click();
-    else renderOverview();
+    // Refresh the active panel
+    const active = document.querySelector('.nav-link.active');
+    if (active) {
+      const match = active.getAttribute('onclick')?.match(/showPanel\('(\w+)'/);
+      if (match) showPanel(match[1], active);
+    } else renderOverview();
   }
 
   /* ─── Toast notification ─────────────────────────────────── */
