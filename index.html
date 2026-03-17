@@ -2906,21 +2906,13 @@
     <div class="panel active" id="panel-overview" style="max-width:100%;padding:0;">
 
       <!-- ── Hero ──────────────────────────────────────────────── -->
-      <div class="overview-hero">
+      <div class="overview-hero" id="overviewHero">
         <div class="overview-hero-overlay"></div>
         <div class="overview-hero-content">
-          <div class="overview-hero-eyebrow">✈ Upcoming Journey · Japan</div>
-          <h2 class="overview-hero-title">Kyoto &amp; Osaka</h2>
-          <p class="overview-hero-sub">Spring Cherry Blossom Season · April 2026</p>
-          <div class="overview-hero-stats">
-            <div class="overview-stat"><span class="overview-stat-val">28</span><span class="overview-stat-lbl">Days Away</span></div>
-            <div class="overview-stat-sep"></div>
-            <div class="overview-stat"><span class="overview-stat-val">12</span><span class="overview-stat-lbl">Nights</span></div>
-            <div class="overview-stat-sep"></div>
-            <div class="overview-stat"><span class="overview-stat-val">Apr 14</span><span class="overview-stat-lbl">Departure</span></div>
-            <div class="overview-stat-sep"></div>
-            <div class="overview-stat"><span class="overview-stat-val">Apr 26</span><span class="overview-stat-lbl">Return</span></div>
-          </div>
+          <div class="overview-hero-eyebrow" id="heroEyebrow">✈ Upcoming Journey</div>
+          <h2 class="overview-hero-title" id="heroTitle">—</h2>
+          <p class="overview-hero-sub" id="heroSub"></p>
+          <div class="overview-hero-stats" id="heroStats"></div>
         </div>
       </div>
 
@@ -2930,33 +2922,7 @@
         <div class="section-header" style="margin-bottom:16px;">
           <h3>Trip at a Glance</h3>
         </div>
-        <div class="booking-stat-row">
-          <div class="booking-stat-card">
-            <div class="bsc-icon" style="background:var(--primary-bg);color:var(--primary);">✈</div>
-            <div class="bsc-value">2</div>
-            <div class="bsc-label">Flights</div>
-          </div>
-          <div class="booking-stat-card">
-            <div class="bsc-icon" style="background:#EDE8E0;color:#7A5C3A;">🏯</div>
-            <div class="bsc-value">3</div>
-            <div class="bsc-label">Stays</div>
-          </div>
-          <div class="booking-stat-card">
-            <div class="bsc-icon" style="background:var(--accent-bg);color:var(--accent);">🎎</div>
-            <div class="bsc-value">8</div>
-            <div class="bsc-label">Activities</div>
-          </div>
-          <div class="booking-stat-card">
-            <div class="bsc-icon" style="background:var(--sand);color:var(--brown-mid);">🚃</div>
-            <div class="bsc-value">4</div>
-            <div class="bsc-label">Transport</div>
-          </div>
-          <div class="booking-stat-card">
-            <div class="bsc-icon" style="background:#EAE6F0;color:#6B5B8A;">📌</div>
-            <div class="bsc-value">6</div>
-            <div class="bsc-label">Events</div>
-          </div>
-        </div>
+        <div class="booking-stat-row" id="overviewStatCards"></div>
 
         <!-- ── Timeline ───────────────────────────────────────── -->
         <div class="section-header" style="margin:32px 0 18px;">
@@ -2964,142 +2930,7 @@
           <span class="tag">Sorted by date</span>
         </div>
 
-        <div class="timeline" id="overview-timeline">
-
-          <div class="timeline-date-marker">Mon 14 April</div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:var(--primary);"></div>
-            <div class="tl-icon">✈</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:var(--primary-bg);color:var(--primary);">Flight</div>
-              <div class="tl-title">Heathrow → Kansai (KIX)</div>
-              <div class="tl-detail">JAL 44 · Departs 07:30 · Arrives 17:00 local · Ref: GBKY2</div>
-            </div>
-            <div class="tl-meta">07:30</div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:#7A5C3A;"></div>
-            <div class="tl-icon">🏯</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:#EDE8E0;color:#7A5C3A;">Stay</div>
-              <div class="tl-title">Check in — Ryokan Seifu, Kyoto</div>
-              <div class="tl-detail">Higashiyama district · Check out Apr 20 · Conf: RSF-2026-0414</div>
-            </div>
-            <div class="tl-meta">19:00</div>
-          </div>
-
-          <div class="timeline-date-marker">Tue 15 April</div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:var(--accent);"></div>
-            <div class="tl-icon">🎎</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:var(--accent-bg);color:var(--accent);">Activity</div>
-              <div class="tl-title">Fushimi Inari Taisha — sunrise hike</div>
-              <div class="tl-detail">2–3 hr round trip · no booking required · bring layers</div>
-            </div>
-            <div class="tl-meta">07:00</div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:var(--accent);"></div>
-            <div class="tl-icon">🎎</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:var(--accent-bg);color:var(--accent);">Activity</div>
-              <div class="tl-title">Gion district walk &amp; Yasaka Shrine</div>
-              <div class="tl-detail">Hanamikoji Street · free entry</div>
-            </div>
-            <div class="tl-meta">15:00</div>
-          </div>
-
-          <div class="timeline-date-marker">Wed 16 April</div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:var(--accent);"></div>
-            <div class="tl-icon">🎎</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:var(--accent-bg);color:var(--accent);">Activity</div>
-              <div class="tl-title">Arashiyama Bamboo Grove &amp; Tenryu-ji</div>
-              <div class="tl-detail">Entry ¥500 · Conf: TENRYU-0416</div>
-            </div>
-            <div class="tl-meta">08:30</div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:var(--brown-mid);"></div>
-            <div class="tl-icon">🚤</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:var(--sand);color:var(--brown-mid);">Transport</div>
-              <div class="tl-title">Boat ride — Ōi River</div>
-              <div class="tl-detail">45 min · book at the pier · cherry blossoms in bloom</div>
-            </div>
-            <div class="tl-meta">11:00</div>
-          </div>
-
-          <div class="timeline-date-marker">Sat 19 April</div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:var(--accent);"></div>
-            <div class="tl-icon">🍽</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:var(--accent-bg);color:var(--accent);">Dining</div>
-              <div class="tl-title">Omakase — Kikunoi Honten</div>
-              <div class="tl-detail">8-course kaiseki · Reservation confirmed · Dress smart</div>
-            </div>
-            <div class="tl-meta">19:30</div>
-          </div>
-
-          <div class="timeline-date-marker">Mon 21 April</div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:var(--brown-mid);"></div>
-            <div class="tl-icon">🚄</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:var(--sand);color:var(--brown-mid);">Transport</div>
-              <div class="tl-title">Kyoto → Osaka · Shinkansen</div>
-              <div class="tl-detail">JR West · 15 min · Conf: SHINKANSEN-0421</div>
-            </div>
-            <div class="tl-meta">10:00</div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:#7A5C3A;"></div>
-            <div class="tl-icon">🏨</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:#EDE8E0;color:#7A5C3A;">Stay</div>
-              <div class="tl-title">Check in — Hoxton Osaka</div>
-              <div class="tl-detail">Namba area · Check out Apr 26 · Conf: HOX-OSA-0421</div>
-            </div>
-            <div class="tl-meta">14:00</div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:#6B5B8A;"></div>
-            <div class="tl-icon">📌</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:#EAE6F0;color:#6B5B8A;">Event</div>
-              <div class="tl-title">Dotonbori evening walk</div>
-              <div class="tl-detail">Try takoyaki from Kukuru · Glico Man sign</div>
-            </div>
-            <div class="tl-meta">19:00</div>
-          </div>
-
-          <div class="timeline-date-marker">Sat 26 April</div>
-
-          <div class="tl-item">
-            <div class="tl-dot" style="background:var(--primary);"></div>
-            <div class="tl-icon">✈</div>
-            <div class="tl-body">
-              <div class="tl-type-badge" style="background:var(--primary-bg);color:var(--primary);">Flight</div>
-              <div class="tl-title">Osaka (OSA) → Heathrow (LHR)</div>
-              <div class="tl-detail">BA 5 · Departs 13:00 · Arrives 18:10 · Ref: BA5GBR</div>
-            </div>
-            <div class="tl-meta">13:00</div>
-          </div>
-
-        </div>
+        <div class="timeline" id="overview-timeline"></div>
 
       </div>
     </div>
@@ -4089,6 +3920,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     // sync both desktop and mobile nav links
     document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
+    if (id === 'overview')   renderOverview();
     if (id === 'packing') updatePackCount();
     if (id === 'itinerary')  renderItinerary();
     if (id === 'calendar')   renderCalendar();
@@ -4159,6 +3991,9 @@ e.g. from an e-mail, booking website, or any confirmation document."
     tripsSave(trips);
     tripsRender();
     closeTripDropdown();
+    renderOverview();
+    if (typeof renderItinerary === 'function') renderItinerary();
+    if (typeof renderCalendar  === 'function') renderCalendar();
   }
 
   function deleteTrip(id, e) {
@@ -4481,6 +4316,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   renderPacking();
   tripsRender();
+  renderOverview();
 
   /* ─── Emergency Info ──────────────────────────────────────── */
   const EM_KEY = 'wanderlog_emergency';
@@ -5030,7 +4866,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
       : desc || '—';
     const trips = tripsLoad();
     trips.forEach(t => t.active = false);
-    trips.push({ id: 'trip-' + Date.now(), name: dest, dates: dateStr, color, active: true });
+    trips.push({ id: 'trip-' + Date.now(), name: dest, dates: dateStr, color, active: true, from, to });
     tripsSave(trips);
     tripsRender();
     closeModal();
@@ -5123,8 +4959,23 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   /* ─── localStorage persistence ───────────────────────────── */
-  function bmGetAll()          { return JSON.parse(localStorage.getItem('wanderlog_bookings') || '[]'); }
-  function bmSaveAll(arr)      { localStorage.setItem('wanderlog_bookings', JSON.stringify(arr)); }
+  function bmTripKey() {
+    const active = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    return 'wanderlog_bookings_' + (active?.id || 'default');
+  }
+  function bmGetAll() {
+    // Migrate legacy single-key data into trip-1 on first access
+    const legacyKey = 'wanderlog_bookings';
+    const tripKey   = bmTripKey();
+    if (!localStorage.getItem(tripKey) && localStorage.getItem(legacyKey)) {
+      localStorage.setItem('wanderlog_bookings_trip-1', localStorage.getItem(legacyKey));
+      localStorage.removeItem(legacyKey);
+    }
+    return JSON.parse(localStorage.getItem(tripKey) || '[]');
+  }
+  function bmSaveAll(arr) {
+    localStorage.setItem(bmTripKey(), JSON.stringify(arr));
+  }
   function bmGetBooking(id)    { return bmGetAll().find(b => b.id === id); }
 
   function bmBuildData() {
@@ -5898,6 +5749,133 @@ e.g. from an e-mail, booking website, or any confirmation document."
     const newHtml = wxtBuildCard(city, data.unit, wxtTripDates());
     if (card) card.outerHTML = newHtml;
     else wxtRenderGrid(data, wxtTripDates());
+  }
+
+  /* ─── Overview page ─────────────────────────────────────────── */
+  function renderOverview() {
+    const trip    = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    const bookings = bmGetAll();
+
+    /* ── Hero ── */
+    const titleEl   = document.getElementById('heroTitle');
+    const eyebrowEl = document.getElementById('heroEyebrow');
+    const subEl     = document.getElementById('heroSub');
+    const statsEl   = document.getElementById('heroStats');
+    if (!titleEl) return;
+
+    titleEl.textContent = trip ? trip.name : '—';
+
+    // Compute stats from trip dates
+    const sep = '–';
+    let daysAway = '—', nights = '—', departure = '—', ret = '—';
+    if (trip?.from && trip?.to) {
+      const f = new Date(trip.from), t = new Date(trip.to);
+      const now = new Date(); now.setHours(0,0,0,0);
+      const diff = Math.ceil((f - now) / 86400000);
+      daysAway  = diff > 0 ? diff : 0;
+      nights    = Math.round((t - f) / 86400000);
+      departure = f.toLocaleDateString('en-GB', {month:'short', day:'numeric'});
+      ret       = t.toLocaleDateString('en-GB', {month:'short', day:'numeric'});
+      eyebrowEl.textContent = `✈ Upcoming Journey · ${trip.name}`;
+      subEl.textContent = trip.dates || '';
+    } else if (trip?.dates) {
+      eyebrowEl.textContent = `✈ Upcoming Journey · ${trip.name}`;
+      subEl.textContent = trip.dates;
+    } else {
+      eyebrowEl.textContent = '✈ New Trip';
+      subEl.textContent = 'Add bookings to get started.';
+    }
+
+    statsEl.innerHTML = `
+      <div class="overview-stat"><span class="overview-stat-val">${daysAway}</span><span class="overview-stat-lbl">Days Away</span></div>
+      <div class="overview-stat-sep"></div>
+      <div class="overview-stat"><span class="overview-stat-val">${nights}</span><span class="overview-stat-lbl">Nights</span></div>
+      <div class="overview-stat-sep"></div>
+      <div class="overview-stat"><span class="overview-stat-val">${departure}</span><span class="overview-stat-lbl">Departure</span></div>
+      <div class="overview-stat-sep"></div>
+      <div class="overview-stat"><span class="overview-stat-val">${ret}</span><span class="overview-stat-lbl">Return</span></div>`;
+
+    /* ── Stat cards ── */
+    const counts = { flight: 0, accommodation: 0, tour_activity: 0, transport: 0, general_event: 0 };
+    bookings.forEach(b => { if (counts[b.type] !== undefined) counts[b.type]++; });
+    const cardDefs = [
+      { type: 'flight',        icon: '✈',  label: 'Flights',    bg: 'var(--primary-bg)', fg: 'var(--primary)' },
+      { type: 'accommodation', icon: '🏨', label: 'Stays',      bg: '#EDE8E0',           fg: '#7A5C3A' },
+      { type: 'tour_activity', icon: '🎎', label: 'Activities', bg: 'var(--accent-bg)',  fg: 'var(--accent)' },
+      { type: 'transport',     icon: '🚃', label: 'Transport',  bg: 'var(--sand)',        fg: 'var(--brown-mid)' },
+      { type: 'general_event', icon: '📌', label: 'Events',     bg: '#EAE6F0',           fg: '#6B5B8A' },
+    ];
+    const cardEl = document.getElementById('overviewStatCards');
+    if (cardEl) {
+      cardEl.innerHTML = cardDefs.map(d => `
+        <div class="booking-stat-card">
+          <div class="bsc-icon" style="background:${d.bg};color:${d.fg};">${d.icon}</div>
+          <div class="bsc-value">${counts[d.type]}</div>
+          <div class="bsc-label">${d.label}</div>
+        </div>`).join('');
+    }
+
+    /* ── Timeline ── */
+    const tlEl = document.getElementById('overview-timeline');
+    if (!tlEl) return;
+    if (bookings.length === 0) {
+      tlEl.innerHTML = `<div class="itin-empty" style="display:block;">
+        <span class="ie-icon">🗺</span>
+        <h4>No bookings yet</h4>
+        <p>Import a confirmation or add bookings manually.</p>
+        <button class="btn btn-primary" onclick="document.querySelector('[onclick*=openAddEventModal]')?.click() || openAddEventModal()">+ Add Booking</button>
+      </div>`;
+      return;
+    }
+
+    // Sort by date then time
+    const TYPE_META = {
+      flight:        { label:'Flight',    icon:'✈',  bg:'var(--primary-bg)', fg:'var(--primary)' },
+      accommodation: { label:'Stay',      icon:'🏨', bg:'#EDE8E0',           fg:'#7A5C3A' },
+      tour_activity: { label:'Activity',  icon:'🎎', bg:'var(--accent-bg)',  fg:'var(--accent)' },
+      transport:     { label:'Transport', icon:'🚗', bg:'var(--sand)',        fg:'var(--brown-mid)' },
+      general_event: { label:'Event',     icon:'📌', bg:'#EAE6F0',           fg:'#6B5B8A' },
+    };
+    function ovDate(b) { return b.data?.date || b.data?.checkIn || b.data?.startDate || ''; }
+    function ovTime(b) { return b.data?.time || b.data?.checkInTime || ''; }
+    function ovFmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso + 'T00:00:00');
+      return d.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'long'});
+    }
+
+    const groups = {};
+    bookings.forEach(b => {
+      const key = ovDate(b) || '__undated__';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(b);
+    });
+    const sortedDates = Object.keys(groups).sort((a,b) => {
+      if (a === '__undated__') return 1;
+      if (b === '__undated__') return -1;
+      return a.localeCompare(b);
+    });
+    sortedDates.forEach(d => groups[d].sort((a,b) => (ovTime(a)||'99:99').localeCompare(ovTime(b)||'99:99')));
+
+    tlEl.innerHTML = sortedDates.map(date => {
+      const items = groups[date].map(b => {
+        const m    = TYPE_META[b.type] || { label: b.type, icon: '📌', bg: '#eee', fg: '#333' };
+        const name = b.data?.name || b.data?.route || b.data?.description || '—';
+        const time = ovTime(b);
+        const esc  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return `<div class="tl-item" ondblclick="openAddEventModal('${b.id}')">
+          <div class="tl-dot" style="background:${m.fg};"></div>
+          <div class="tl-icon">${m.icon}</div>
+          <div class="tl-body">
+            <div class="tl-type-badge" style="background:${m.bg};color:${m.fg};">${m.label}</div>
+            <div class="tl-title">${esc(name)}</div>
+          </div>
+          ${time ? `<div class="tl-meta">${esc(time)}</div>` : ''}
+        </div>`;
+      }).join('');
+      const header = date === '__undated__' ? 'Undated' : ovFmtDate(date);
+      return `<div class="timeline-date-marker">${header}</div>${items}`;
+    }).join('');
   }
 
   /* ── Main render (called from showPanel) ─────────────────────── */
