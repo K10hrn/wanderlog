@@ -2847,7 +2847,7 @@
         <!-- trips rendered by tripsRender() -->
         <div id="tripList"></div>
         <div style="height:1px;background:var(--divider);margin:6px 4px;"></div>
-        <div class="trip-dropdown-item" onclick="openModal(); closeTripDropdown();">
+        <div class="trip-dropdown-item" onclick="event.stopPropagation(); closeTripDropdown(); openModal();">
           <div class="trip-color-dot" style="background:var(--text-muted);"></div>
           <div>
             <div class="trip-dropdown-dest" style="color:var(--text-muted);">+ New trip</div>
