@@ -3814,13 +3814,10 @@ e.g. from an e-mail, booking website, or any confirmation document."
   const SB_KEY = 'sb_publishable_o72ccrGdTdhoV9TjfhEHQg_V2Q_zU9C';
   const sb     = supabase.createClient(SB_URL, SB_KEY);
 
-  // Keys that are synced to the cloud (weather is a cache — excluded)
+  // Static keys synced to cloud. Per-trip dynamic keys (wanderlog_*_trip-X)
+  // are discovered at sync time via Object.keys(localStorage).
   const CLOUD_KEYS = [
-    'wanderlog_bookings',
-    'wanderlog_spend',
-    'wanderlog_distances',
-    'wanderlog_packing',
-    'wanderlog_emergency',
+    'wanderlog_trips',
   ];
 
   let _authMode = 'signin'; // 'signin' | 'signup'
@@ -3967,9 +3964,9 @@ e.g. from an e-mail, booking website, or any confirmation document."
   async function syncToCloud() {
     if (!_sbUser) { showToast('Sign in first', 'error'); return; }
 
-    // Collect all relevant keys: fixed keys + trips key + per-trip booking keys
-    const dynamicKeys = Object.keys(localStorage).filter(k => k.startsWith('wanderlog_bookings_'));
-    const allKeys = [...new Set([...CLOUD_KEYS, TRIPS_KEY, ...dynamicKeys])];
+    // Collect all wanderlog_* keys from localStorage (covers all per-trip dynamic keys)
+    const dynamicKeys = Object.keys(localStorage).filter(k => k.startsWith('wanderlog_'));
+    const allKeys = [...new Set([...CLOUD_KEYS, ...dynamicKeys])];
     const present = allKeys.filter(k => localStorage.getItem(k) !== null);
     if (present.length === 0) {
       showToast('Nothing to sync — all data is already in the cloud', 'info');
@@ -4130,9 +4127,13 @@ e.g. from an e-mail, booking website, or any confirmation document."
     tripsRender();
     closeTripDropdown();
     renderOverview();
-    if (typeof renderItinerary === 'function') renderItinerary();
-    if (typeof renderCalendar  === 'function') renderCalendar();
-    if (typeof renderWeather   === 'function') renderWeather();
+    if (typeof renderItinerary  === 'function') renderItinerary();
+    if (typeof renderCalendar   === 'function') renderCalendar();
+    if (typeof renderWeather    === 'function') renderWeather();
+    if (typeof renderSpend      === 'function') renderSpend();
+    if (typeof renderDistances  === 'function') renderDistances();
+    if (typeof renderPacking    === 'function') renderPacking();
+    if (typeof renderEmergency  === 'function') renderEmergency();
   }
 
   function deleteTrip(id, e) {
@@ -4161,7 +4162,11 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   /* ─── Packing list ───────────────────────────────────────── */
-  const PK_KEY = 'wanderlog_packing';
+  const PK_KEY_BASE = 'wanderlog_packing';
+  function pkTripKey() {
+    const active = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    return PK_KEY_BASE + '_' + (active?.id || 'default');
+  }
 
   function pkDefault() {
     return {
@@ -4238,14 +4243,14 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   function pkLoad() {
     try {
-      const raw = localStorage.getItem(PK_KEY);
+      const raw = localStorage.getItem(pkTripKey());
       if (raw) return JSON.parse(raw);
     } catch(e) {}
     return pkDefault();
   }
 
   function pkSave(data) {
-    localStorage.setItem(PK_KEY, JSON.stringify(data));
+    localStorage.setItem(pkTripKey(), JSON.stringify(data));
   }
 
   function pkEsc(s) {
@@ -4458,7 +4463,11 @@ e.g. from an e-mail, booking website, or any confirmation document."
   renderOverview();
 
   /* ─── Emergency Info ──────────────────────────────────────── */
-  const EM_KEY = 'wanderlog_emergency';
+  const EM_KEY_BASE = 'wanderlog_emergency';
+  function emTripKey() {
+    const active = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    return EM_KEY_BASE + '_' + (active?.id || 'default');
+  }
 
   function emDefault() {
     return {
@@ -4478,10 +4487,9 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   function emLoad() {
     try {
-      const raw = localStorage.getItem(EM_KEY);
+      const raw = localStorage.getItem(emTripKey());
       if (raw) {
         const d = JSON.parse(raw);
-        // Ensure collapsed key exists (migration)
         if (!d.collapsed) d.collapsed = { insurance: false, contacts: false, vehicles: false, local: false };
         return d;
       }
@@ -4490,7 +4498,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   function emSave(data) {
-    localStorage.setItem(EM_KEY, JSON.stringify(data));
+    localStorage.setItem(emTripKey(), JSON.stringify(data));
   }
 
   function emEsc(s) {
@@ -6379,17 +6387,21 @@ e.g. from an e-mail, booking website, or any confirmation document."
    *  DISTANCES
    * ═══════════════════════════════════════════════════════════════ */
 
-  const DST_STORAGE_KEY = 'wanderlog_distances';
+  const DST_KEY_BASE = 'wanderlog_distances';
+  function dstTripKey() {
+    const active = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    return DST_KEY_BASE + '_' + (active?.id || 'default');
+  }
 
   function dstLoad() {
     try {
-      const raw = localStorage.getItem(DST_STORAGE_KEY);
+      const raw = localStorage.getItem(dstTripKey());
       return raw ? JSON.parse(raw) : [];
     } catch { return []; }
   }
 
   function dstSave(legs) {
-    localStorage.setItem(DST_STORAGE_KEY, JSON.stringify(legs));
+    localStorage.setItem(dstTripKey(), JSON.stringify(legs));
   }
 
   function dstEsc(str) {
@@ -6564,7 +6576,11 @@ e.g. from an e-mail, booking website, or any confirmation document."
     tour_activity:'Tours & Activities', transport:'Transport', general_event:'Other'
   };
   const SPD_CURRENCIES = ['GBP','USD','EUR','JPY','AUD','CHF','CAD','NOK','SEK','DKK','NZD','SGD','HKD','THB','MYR','MAD','TRY','IDR','KRW'];
-  const SPD_STORAGE_KEY = 'wanderlog_spend';
+  const SPD_KEY_BASE = 'wanderlog_spend';
+  function spdTripKey() {
+    const active = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    return SPD_KEY_BASE + '_' + (active?.id || 'default');
+  }
 
   function spdDefault() {
     return { budget:4200, homeCurrency:'GBP', travellers:['You','Partner'], rates:{}, expenses:[] };
@@ -6572,7 +6588,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   function spdLoad() {
     try {
-      const raw = localStorage.getItem(SPD_STORAGE_KEY);
+      const raw = localStorage.getItem(spdTripKey());
       if (!raw) return spdDefault();
       const d = JSON.parse(raw);
       // back-compat: ensure all fields exist
@@ -6581,7 +6597,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   function spdSaveData(data) {
-    localStorage.setItem(SPD_STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(spdTripKey(), JSON.stringify(data));
   }
 
   function spdSaveSetting(field, value) {
@@ -7853,32 +7869,32 @@ Omit fields that are genuinely unknown. Never guess dates or prices.`;
       cloudAutoSync(bmTripKey(), arr);
     };
 
-    // Spend
+    // Spend — per-trip key
     const _spdOrig = spdSaveData;
     spdSaveData = function(data) {
       _spdOrig(data);
-      cloudAutoSync('wanderlog_spend', data);
+      cloudAutoSync(spdTripKey(), data);
     };
 
-    // Distances
+    // Distances — per-trip key
     const _dstOrig = dstSave;
     dstSave = function(legs) {
       _dstOrig(legs);
-      cloudAutoSync('wanderlog_distances', legs);
+      cloudAutoSync(dstTripKey(), legs);
     };
 
-    // Packing
+    // Packing — per-trip key
     const _pkOrig = pkSave;
     pkSave = function(data) {
       _pkOrig(data);
-      cloudAutoSync('wanderlog_packing', data);
+      cloudAutoSync(pkTripKey(), data);
     };
 
-    // Emergency
+    // Emergency — per-trip key
     const _emOrig = emSave;
     emSave = function(data) {
       _emOrig(data);
-      cloudAutoSync('wanderlog_emergency', data);
+      cloudAutoSync(emTripKey(), data);
     };
   })();
 </script>
