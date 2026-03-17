@@ -198,6 +198,28 @@
       border-radius: 50%;
       flex-shrink: 0;
     }
+    .trip-color-swatches {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+    }
+    .trip-color-swatch {
+      width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+      border: 3px solid transparent; transition: border-color 0.15s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .trip-color-swatch:hover { transform: scale(1.15); }
+    .trip-color-swatch.selected { border-color: var(--text); }
+    /* Inline colour swatches inside trip dropdown */
+    .trip-dropdown-colors {
+      display: flex; gap: 5px; margin-top: 6px; padding-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+    .trip-dropdown-swatch {
+      width: 18px; height: 18px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: border-color 0.15s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .trip-dropdown-swatch:hover { transform: scale(1.2); }
+    .trip-dropdown-swatch.active { border-color: var(--text); }
     .trip-dropdown-item .trip-del-btn {
       margin-left: auto;
       opacity: 0;
@@ -3369,6 +3391,10 @@
         <input class="input" type="date" id="newTo" />
       </div>
     </div>
+    <div class="form-group">
+      <label class="form-label">Colour</label>
+      <div class="trip-color-swatches" id="newTripColorSwatches"></div>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="addTrip()">Create Trip</button>
@@ -3990,9 +4016,14 @@ e.g. from an e-mail, booking website, or any confirmation document."
       <div class="trip-dropdown-item${t.active ? ' active' : ''}" data-trip-id="${t.id}"
            onclick="switchTrip('${t.id}', event)">
         <div class="trip-color-dot" style="background:${t.color};"></div>
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="trip-dropdown-dest">${t.name}</div>
           <div class="trip-dropdown-dates">${t.dates}</div>
+          <div class="trip-dropdown-colors">
+            ${TRIP_COLORS.map(c => `<div class="trip-dropdown-swatch${t.color===c?' active':''}"
+              style="background:${c}" title="Change colour"
+              onclick="changeTripColor('${t.id}','${c}',event)"></div>`).join('')}
+          </div>
         </div>
         <button class="trip-del-btn" onclick="deleteTrip('${t.id}', event)" title="Remove trip">✕</button>
       </div>`).join('');
@@ -4872,9 +4903,24 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   /* ─── Trip modal ─────────────────────────────────────────── */
-  function openModal() { document.getElementById('modal').classList.add('open'); }
+  function openModal() {
+    document.getElementById('modal').classList.add('open');
+    // Render colour swatches, default to first colour
+    const wrap = document.getElementById('newTripColorSwatches');
+    if (wrap) {
+      wrap.innerHTML = TRIP_COLORS.map((c, i) =>
+        `<div class="trip-color-swatch${i===0?' selected':''}" style="background:${c}"
+          data-color="${c}" onclick="selectNewTripColor(this)"></div>`
+      ).join('');
+    }
+  }
   function closeModal() { document.getElementById('modal').classList.remove('open'); }
   function closeModalOutside(e) { if (e.target.id === 'modal') closeModal(); }
+
+  function selectNewTripColor(el) {
+    document.querySelectorAll('#newTripColorSwatches .trip-color-swatch').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+  }
 
   function addTrip() {
     const dest = document.getElementById('newDest').value.trim();
@@ -4882,7 +4928,8 @@ e.g. from an e-mail, booking website, or any confirmation document."
     const from = document.getElementById('newFrom').value;
     const to   = document.getElementById('newTo').value;
     if (!dest) return;
-    const color   = TRIP_COLORS[Math.floor(Math.random() * TRIP_COLORS.length)];
+    const selected = document.querySelector('#newTripColorSwatches .trip-color-swatch.selected');
+    const color = selected ? selected.dataset.color : TRIP_COLORS[0];
     const dateStr = from && to
       ? new Date(from).toLocaleDateString('en-GB', {month:'short', day:'numeric'}) + ' – ' +
         new Date(to).toLocaleDateString('en-GB', {month:'short', day:'numeric', year:'numeric'})
@@ -4895,6 +4942,16 @@ e.g. from an e-mail, booking website, or any confirmation document."
     renderOverview();
     closeModal();
     ['newDest','newDesc','newFrom','newTo'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  function changeTripColor(id, color, e) {
+    if (e) e.stopPropagation();
+    const trips = tripsLoad();
+    const trip = trips.find(t => t.id === id);
+    if (!trip) return;
+    trip.color = color;
+    tripsSave(trips);
+    tripsRender();
   }
 
   /* ─── Booking modal ──────────────────────────────────────────
