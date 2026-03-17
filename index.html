@@ -3976,6 +3976,15 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   function tripsRender() {
     const trips = tripsLoad();
+    // Sort by departure date; undated trips go to the end
+    trips.sort((a, b) => {
+      const da = a.from || '';
+      const db = b.from || '';
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return da.localeCompare(db);
+    });
     const list  = document.getElementById('tripList');
     list.innerHTML = trips.map(t => `
       <div class="trip-dropdown-item${t.active ? ' active' : ''}" data-trip-id="${t.id}"
