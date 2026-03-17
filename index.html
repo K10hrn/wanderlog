@@ -3918,6 +3918,13 @@ e.g. from an e-mail, booking website, or any confirmation document."
         localStorage.setItem(row.key, JSON.stringify(row.value));
       });
     }
+    // After pull, re-render active panel so new data is visible immediately
+    const activePanel = document.querySelector('.panel.active');
+    if (activePanel) {
+      const id = activePanel.id.replace('panel-', '');
+      const navEl = document.querySelector(`.nav-link[onclick*="'${id}'"]`);
+      showPanel(id, navEl);
+    }
   }
 
   /* ── Auto-sync one key after every save ─────────────────── */
@@ -3935,7 +3942,10 @@ e.g. from an e-mail, booking website, or any confirmation document."
   async function syncToCloud() {
     if (!_sbUser) { showToast('Sign in first', 'error'); return; }
 
-    const present = CLOUD_KEYS.filter(k => localStorage.getItem(k) !== null);
+    // Collect all relevant keys: fixed keys + trips key + per-trip booking keys
+    const dynamicKeys = Object.keys(localStorage).filter(k => k.startsWith('wanderlog_bookings_'));
+    const allKeys = [...new Set([...CLOUD_KEYS, TRIPS_KEY, ...dynamicKeys])];
+    const present = allKeys.filter(k => localStorage.getItem(k) !== null);
     if (present.length === 0) {
       showToast('Nothing to sync — all data is already in the cloud', 'info');
       return;
@@ -4049,6 +4059,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   function tripsSave(trips) {
     localStorage.setItem(TRIPS_KEY, JSON.stringify(trips));
+    cloudAutoSync(TRIPS_KEY, trips);
   }
 
   function tripsRender() {
@@ -7743,11 +7754,11 @@ Omit fields that are genuinely unknown. Never guess dates or prices.`;
    *  Each save function keeps writing to localStorage as before,
    *  then fires a background upsert to Supabase.               */
   (function patchSavesForCloud() {
-    // Bookings
+    // Bookings — use the dynamic per-trip key
     const _bmOrig = bmSaveAll;
     bmSaveAll = function(arr) {
       _bmOrig(arr);
-      cloudAutoSync('wanderlog_bookings', arr);
+      cloudAutoSync(bmTripKey(), arr);
     };
 
     // Spend
