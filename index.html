@@ -3379,12 +3379,13 @@
 </div>
 
 <script>
+  console.log('[WL] auth script block started');
   /* ─── Supabase auth + cloud sync ────────────────────────── */
   const SB_URL = 'https://dakfivwleerxwdmlgfif.supabase.co';
   const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRha2ZpdndsZWVyeHdkbWxnZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NDM0NDUsImV4cCI6MjA4OTMxOTQ0NX0.uRsjz_6DsBNYnrH-jck6EHuftKYEkrBZLSphL8erEq4';
   let sb;
-  try { sb = supabase.createClient(SB_URL, SB_KEY); }
-  catch(e) { console.warn('Supabase init failed:', e); sb = null; }
+  try { sb = supabase.createClient(SB_URL, SB_KEY); console.log('[WL] Supabase client created OK'); }
+  catch(e) { console.warn('[WL] Supabase init failed:', e); sb = null; }
 
   // Static keys synced to cloud. Per-trip dynamic keys (wanderlog_*_trip-X)
   // are discovered at sync time via Object.keys(localStorage).
@@ -3422,8 +3423,10 @@
     document.getElementById('authError').textContent = '';
   }
 
+  console.log('[WL] authSubmit defined OK');
   /* ── Submit (sign-in or sign-up) ─────────────────────────── */
   async function authSubmit() {
+    console.log('[WL] authSubmit called, sb =', sb);
     const email    = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
     const confirm  = document.getElementById('authPasswordConfirm').value;
