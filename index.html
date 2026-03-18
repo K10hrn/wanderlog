@@ -3724,8 +3724,8 @@
         <span class="dz-icon">🗂️</span>
         <div class="dz-primary">Drop your booking confirmation here</div>
         <div class="dz-secondary">or <span class="dz-browse">browse to upload</span></div>
-        <div class="dz-hint">PDF · PNG · JPG · WEBP · GIF — max 20 MB</div>
-        <input type="file" id="imFileInput" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif"
+        <div class="dz-hint">PDF · PNG · JPG · WEBP · GIF · Excel · CSV · Word — max 20 MB</div>
+        <input type="file" id="imFileInput" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.xlsx,.xls,.csv,.docx,.txt"
                style="display:none;" onchange="imFileSelected(this)" />
       </div>
       <div class="im-file-preview" id="imFilePreview" style="display:none;">
@@ -7547,32 +7547,88 @@ e.g. from an e-mail, booking website, or any confirmation document."
     if (input.files[0]) imProcessFile(input.files[0]);
   }
 
+  function imShowFilePreview(icon, name, size) {
+    document.getElementById('imDropZone').style.display    = 'none';
+    document.getElementById('imFilePreview').style.display = 'flex';
+    document.getElementById('imFpIcon').textContent = icon;
+    document.getElementById('imFpName').textContent = name;
+    document.getElementById('imFpSize').textContent = (size / 1024).toFixed(0) + ' KB';
+  }
+
   function imProcessFile(file) {
     const MAX_MB = 20;
     if (file.size > MAX_MB * 1024 * 1024) {
       imShowError(`File too large (${(file.size/1024/1024).toFixed(1)} MB). Maximum is ${MAX_MB} MB.`);
       return;
     }
-    const allowed = ['application/pdf','image/png','image/jpeg','image/webp','image/gif'];
-    const mime = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
-    if (!allowed.includes(mime)) {
-      imShowError('Unsupported file type. Please upload a PDF, PNG, JPG, WEBP, or GIF.');
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const isImage = ['png','jpg','jpeg','webp','gif'].includes(ext);
+    const isPdf   = ext === 'pdf';
+    const isCsv   = ext === 'csv';
+    const isTxt   = ext === 'txt';
+    const isExcel = ['xlsx','xls'].includes(ext);
+    const isDocx  = ext === 'docx';
+
+    if (!isImage && !isPdf && !isCsv && !isTxt && !isExcel && !isDocx) {
+      imShowError('Unsupported file type. Please upload a PDF, image, Excel, CSV, Word (.docx), or text file.');
       return;
     }
     imHideError();
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      // ev.result is data:mime;base64,xxxx — strip the prefix
-      const b64 = ev.target.result.split(',')[1];
-      imFile = { base64: b64, mimeType: mime, name: file.name, size: file.size };
-      // Show preview
-      document.getElementById('imDropZone').style.display   = 'none';
-      document.getElementById('imFilePreview').style.display = 'flex';
-      document.getElementById('imFpIcon').textContent = mime === 'application/pdf' ? '📄' : '🖼️';
-      document.getElementById('imFpName').textContent = file.name;
-      document.getElementById('imFpSize').textContent = (file.size / 1024).toFixed(0) + ' KB';
-    };
-    reader.readAsDataURL(file);
+
+    if (isImage || isPdf) {
+      // Send natively to Claude as base64 document/image
+      const mime = isPdf ? 'application/pdf' : (file.type || 'image/jpeg');
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const b64 = ev.target.result.split(',')[1];
+        imFile = { base64: b64, mimeType: mime, name: file.name, size: file.size };
+        imShowFilePreview(isPdf ? '📄' : '🖼️', file.name, file.size);
+      };
+      reader.readAsDataURL(file);
+
+    } else if (isCsv || isTxt) {
+      // Plain text — read as string and send as text payload
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        imFile = { extractedText: ev.target.result, name: file.name, size: file.size };
+        imShowFilePreview(isCsv ? '📊' : '📝', file.name, file.size);
+      };
+      reader.readAsText(file);
+
+    } else if (isExcel) {
+      // Spreadsheet — convert sheets to CSV text via SheetJS
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
+          let text = '';
+          wb.SheetNames.forEach(sheetName => {
+            text += `=== Sheet: ${sheetName} ===\n`;
+            text += XLSX.utils.sheet_to_csv(wb.Sheets[sheetName]);
+            text += '\n\n';
+          });
+          imFile = { extractedText: text.trim(), name: file.name, size: file.size };
+          imShowFilePreview('📊', file.name, file.size);
+        } catch(e) {
+          imShowError('Could not read Excel file: ' + e.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+
+    } else if (isDocx) {
+      // Word document — extract plain text via mammoth.js
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const result = await mammoth.extractRawText({ arrayBuffer: ev.target.result });
+          imFile = { extractedText: result.value, name: file.name, size: file.size };
+          imShowFilePreview('📝', file.name, file.size);
+        } catch(e) {
+          imShowError('Could not read Word document: ' + e.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
   }
 
   function imClearFile() {
@@ -7749,8 +7805,14 @@ Omit fields that are genuinely unknown. Never guess dates or prices.`;
     // Build payload
     const payload = {};
     if (usingFile && imFile) {
-      payload.fileBase64 = imFile.base64;
-      payload.mimeType   = imFile.mimeType;
+      if (imFile.extractedText) {
+        // Spreadsheet / Word / CSV / TXT — send as text
+        payload.text = `Content extracted from "${imFile.name}":\n\n${imFile.extractedText}`;
+      } else {
+        // PDF / image — send natively as base64
+        payload.fileBase64 = imFile.base64;
+        payload.mimeType   = imFile.mimeType;
+      }
     }
     if (!usingFile && pasteText) {
       payload.text = pasteText;
@@ -8037,5 +8099,9 @@ Omit fields that are genuinely unknown. Never guess dates or prices.`;
     };
   })();
 </script>
+  <!-- SheetJS: Excel/CSV parsing for booking import -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <!-- Mammoth.js: Word document (.docx) parsing for booking import -->
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.9.0/mammoth.browser.min.js"></script>
 </body>
 </html>
