@@ -4996,6 +4996,12 @@
     closeBookingModal();
     bmEditId = null;
     showBookingSuccess(data, isEdit);
+    // Refresh the active panel so the new booking appears immediately
+    const active = document.querySelector('.nav-link.active');
+    if (active) {
+      const match = active.getAttribute('onclick')?.match(/showPanel\('(\w+)'/);
+      if (match) showPanel(match[1], active);
+    } else renderOverview();
   }
 
   function showBookingSuccess(data, isEdit) {
