@@ -28,22 +28,22 @@ test.describe('Navigation', () => {
 
   test('active tab is highlighted', async ({ page }) => {
     await goToTab(page, 'Itinerary');
-    const activeBtn = page.locator('.nav-btn.active');
+    const activeBtn = page.locator('#navLinks .nav-link.active');
     await expect(activeBtn).toContainText('Itinerary');
   });
 
   test('overview shows trip stats cards', async ({ page }) => {
     await goToTab(page, 'Overview');
-    await expect(page.locator('.panel-active #panel-overview')).toBeVisible();
-    // Stats section
-    await expect(page.locator('.glance-card').first()).toBeVisible();
+    await expect(page.locator('#panel-overview.active')).toBeVisible();
+    // Stats section — overview-stat or overview-stat-card
+    await expect(page.locator('.overview-stat').first()).toBeVisible();
   });
 
   test('dark mode toggle works', async ({ page }) => {
     const html = page.locator('html');
-    await page.locator('#themeToggle').click();
+    await page.locator('#themeBtn').click();
     await expect(html).toHaveAttribute('data-theme', 'dark');
-    await page.locator('#themeToggle').click();
+    await page.locator('#themeBtn').click();
     await expect(html).not.toHaveAttribute('data-theme', 'dark');
   });
 

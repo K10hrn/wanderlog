@@ -26,15 +26,17 @@ async function login(page) {
  * Sign out via the lock button in the nav.
  */
 async function logout(page) {
-  await page.click('#lockBtn');
+  await page.click('#navSignOutBtn');
   await page.locator('#lockOverlay').waitFor({ state: 'visible', timeout: 8_000 });
 }
 
 /**
  * Click a nav tab by its visible label text.
+ * Nav items use class .nav-link (not .nav-btn).
  */
 async function goToTab(page, label) {
-  await page.locator('.nav-btn', { hasText: label }).first().click();
+  await page.locator('#navLinks .nav-link', { hasText: label }).first().click();
+  await page.waitForTimeout(300);
 }
 
 /**

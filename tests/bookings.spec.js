@@ -58,7 +58,7 @@ test.describe('Bookings', () => {
     await dismissSuccess(page);
 
     // Reload overview — booking card should appear
-    await page.locator('.nav-btn', { hasText: 'Overview' }).first().click();
+    await page.locator('#navLinks .nav-link', { hasText: 'Overview' }).first().click();
     const card = page.locator('.booking-card', { hasText: 'To Delete' });
     if (await card.isVisible()) {
       await card.click();
