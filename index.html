@@ -23,7 +23,7 @@
       --terra-muted: #F2E4DC;
       --brown:       #3A2D22;
       --brown-mid:   #6B543E;
-      --brown-muted: #9A8068;
+      --brown-muted: #6B5141;
       --border:      #DDD0BC;
       --shadow:      rgba(58, 45, 34, 0.08);
       --shadow-md:   rgba(58, 45, 34, 0.14);
@@ -47,7 +47,7 @@
       --surface-2:   #2E2720;
       --text:        #F0E8DC;
       --text-mid:    #C8B8A4;
-      --text-muted:  #8C7A68;
+      --text-muted:  #B8A090;
       --border:      #3A3028;
       --divider:     #3A3028;
       --shadow:      rgba(0, 0, 0, 0.25);
@@ -61,6 +61,21 @@
       --sand:        #3A3028;
       --sand-2:      #48392C;
     }
+
+    /* ─── Skip link ─────────────────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 8px;
+      background: var(--primary);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 0 0 6px 6px;
+      font-weight: 600;
+      z-index: 10000;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: 0; }
 
     /* ─── Reset & base ──────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -238,6 +253,7 @@
       line-height: 1;
       transition: opacity 0.15s, color 0.15s;
       flex-shrink: 0;
+      min-width: 24px; min-height: 24px;
     }
     .trip-dropdown-item:hover .trip-del-btn { opacity: 1; }
     .trip-dropdown-item .trip-del-btn:hover { color: var(--terra); }
@@ -380,6 +396,8 @@
       border: 1px solid var(--divider);
     }
     .btn-ghost:hover { background: var(--sand); color: var(--text); }
+    .btn-primary:disabled { background: #A8BAA6; color: #FFFFFF; cursor: not-allowed; opacity: 1; }
+    .btn-ghost:disabled { color: #9A8880; cursor: not-allowed; opacity: 1; }
 
     .theme-toggle {
       width: 38px;
@@ -668,6 +686,7 @@
       user-select: none;
     }
     .pack-item:hover { border-color: var(--primary); color: var(--text); }
+    .pack-item:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
     .pack-item.checked { background: var(--primary-bg); border-color: var(--primary); }
     .pack-item.checked .pack-label { text-decoration: line-through; color: var(--text-muted); }
 
@@ -746,6 +765,7 @@
       position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
       background: none; border: none; color: var(--text-muted); cursor: pointer;
       font-size: 11px; opacity: 0; transition: opacity .15s; padding: 2px 4px; border-radius: 4px;
+      min-width: 24px; min-height: 24px;
     }
     .pack-item:hover .pk-item-del { opacity: 1; }
     .pk-item-del:hover { color: var(--accent); background: var(--accent-bg); }
@@ -993,6 +1013,7 @@
     .form-group {
       margin-bottom: 16px;
     }
+    .field-error { color: var(--terra); font-size: 0.8rem; margin-top: 4px; display: block; min-height: 1em; }
 
     .form-label {
       display: block;
@@ -1556,6 +1577,7 @@
     .spd-del-btn {
       background: none; border: none; color: var(--text-muted); cursor: pointer;
       font-size: 14px; padding: 2px 5px; border-radius: 5px; transition: all 0.15s;
+      min-width: 24px; min-height: 24px;
     }
     .spd-del-btn:hover { color: var(--accent); background: var(--accent-bg); }
     .spd-table-footer {
@@ -1662,6 +1684,7 @@
     .dst-del-btn {
       background: none; border: none; color: var(--text-muted); cursor: pointer;
       font-size: 14px; padding: 2px 5px; border-radius: 5px; transition: all 0.15s;
+      min-width: 24px; min-height: 24px;
     }
     .dst-del-btn:hover { color: var(--accent); background: var(--accent-bg); }
     .dst-table-footer {
@@ -1739,6 +1762,7 @@
       background: none; border: none; color: var(--text-muted); cursor: pointer;
       font-size: 14px; padding: 3px 6px; border-radius: 5px;
       transition: all 0.15s; flex-shrink: 0; margin-left: 8px;
+      min-width: 24px; min-height: 24px;
     }
     .wx-remove-btn:hover { color: var(--accent); background: var(--accent-bg); }
     .wx-current {
@@ -1925,6 +1949,7 @@
       flex-direction: column;
     }
     .cal-day:hover { background: var(--sand); }
+    .cal-day:focus { outline: 2px solid var(--primary); outline-offset: 2px; }
     .cal-day.other-month {
       background: var(--bg);
       opacity: 0.45;
@@ -2429,7 +2454,7 @@
     }
     .btn-extract:hover { opacity: 0.88; }
     .btn-extract:active { transform: scale(0.98); }
-    .btn-extract:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-extract:disabled { background: #A8BAA6; color: #FFFFFF; cursor: not-allowed; opacity: 1; }
 
     /* Spinner */
     .im-spinner {
@@ -2663,6 +2688,7 @@
       position: absolute; top: 10px; right: 10px; background: none; border: none;
       color: var(--text-muted); cursor: pointer; font-size: 15px;
       padding: 1px 5px; border-radius: 5px; line-height: 1; transition: color .15s;
+      min-width: 24px; min-height: 24px;
     }
     .em-record-del:hover { color: var(--accent); }
     .em-numbers-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -2681,6 +2707,7 @@
     .em-num-del {
       background: none; border: none; color: var(--text-muted); cursor: pointer;
       font-size: 14px; padding: 3px 6px; border-radius: 5px; transition: color .15s; line-height: 1;
+      min-width: 24px; min-height: 24px;
     }
     .em-num-del:hover { color: var(--accent); }
     .em-add-btn {
@@ -2876,6 +2903,7 @@
   </style>
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to main content</a>
 
 <!-- ─── Auth screen ───────────────────────────────────────── -->
 <div class="lock-overlay" id="lockOverlay">
@@ -2885,10 +2913,10 @@
     <div class="lock-sub" id="authSubtitle">Sign in to access your trips</div>
 
     <input class="lock-email-input" id="authEmail" type="email"
-      placeholder="Email address" autocomplete="email"
+      placeholder="Email address" autocomplete="email" aria-describedby="authError"
       onkeydown="if(event.key==='Enter')document.getElementById('authPassword').focus()">
     <input class="lock-input" id="authPassword" type="password"
-      placeholder="Password" autocomplete="current-password"
+      placeholder="Password" autocomplete="current-password" aria-describedby="authError"
       onkeydown="if(event.key==='Enter')authSubmit()" style="margin-bottom:0;">
     <input class="lock-input" id="authPasswordConfirm" type="password"
       placeholder="Confirm password" autocomplete="new-password"
@@ -2916,15 +2944,15 @@
     </div>
 
     <!-- Trip selector -->
-    <div class="trip-selector" id="tripSelector" onclick="toggleTripDropdown(event)">
+    <div class="trip-selector" id="tripSelector" onclick="toggleTripDropdown(event)" aria-haspopup="menu" aria-expanded="false" aria-controls="tripDropdown" role="button" tabindex="0">
       <div class="trip-color-dot" style="background:var(--primary);"></div>
       <span id="currentTripName">Kyoto &amp; Osaka</span>
       <span class="trip-selector-chevron">▾</span>
-      <div class="trip-dropdown" id="tripDropdown">
+      <div class="trip-dropdown" id="tripDropdown" role="menu">
         <!-- trips rendered by tripsRender() -->
         <div id="tripList"></div>
         <div style="height:1px;background:var(--divider);margin:6px 4px;"></div>
-        <div class="trip-dropdown-item" onclick="event.stopPropagation(); closeTripDropdown(); openModal();">
+        <div class="trip-dropdown-item" role="menuitem" tabindex="-1" onclick="event.stopPropagation(); closeTripDropdown(); openModal();">
           <div class="trip-color-dot" style="background:var(--text-muted);"></div>
           <div>
             <div class="trip-dropdown-dest" style="color:var(--text-muted);">+ New trip</div>
@@ -2934,7 +2962,7 @@
     </div>
 
     <div class="topbar-actions">
-      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeBtn">🌙</button>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeBtn" aria-label="Toggle dark mode" aria-pressed="false">🌙</button>
     </div>
   </header>
 
@@ -2977,7 +3005,7 @@
   </nav>
 
   <!-- ─── Main ──────────────────────────────────────────── -->
-  <main class="main">
+  <main class="main" id="main">
 
     <!-- Overview -->
     <div class="panel active" id="panel-overview" style="max-width:100%;padding:0;">
@@ -3032,13 +3060,13 @@
             <option value="all">All destinations</option>
           </select>
         </div>
-        <div class="itin-type-pills">
-          <button class="itin-type-pill active" data-type="all"           onclick="itinSetType('all',this)">All</button>
-          <button class="itin-type-pill"         data-type="flight"        onclick="itinSetType('flight',this)">✈ Flights</button>
-          <button class="itin-type-pill"         data-type="accommodation" onclick="itinSetType('accommodation',this)">🏨 Stays</button>
-          <button class="itin-type-pill"         data-type="tour_activity" onclick="itinSetType('tour_activity',this)">🎫 Activities</button>
-          <button class="itin-type-pill"         data-type="transport"     onclick="itinSetType('transport',this)">🚌 Transport</button>
-          <button class="itin-type-pill"         data-type="general_event" onclick="itinSetType('general_event',this)">📌 Events</button>
+        <div class="itin-type-pills" role="tablist">
+          <button class="itin-type-pill active" data-type="all"           role="tab" aria-selected="true"  onclick="itinSetType('all',this)">All</button>
+          <button class="itin-type-pill"         data-type="flight"        role="tab" aria-selected="false" onclick="itinSetType('flight',this)">✈ Flights</button>
+          <button class="itin-type-pill"         data-type="accommodation" role="tab" aria-selected="false" onclick="itinSetType('accommodation',this)">🏨 Stays</button>
+          <button class="itin-type-pill"         data-type="tour_activity" role="tab" aria-selected="false" onclick="itinSetType('tour_activity',this)">🎫 Activities</button>
+          <button class="itin-type-pill"         data-type="transport"     role="tab" aria-selected="false" onclick="itinSetType('transport',this)">🚌 Transport</button>
+          <button class="itin-type-pill"         data-type="general_event" role="tab" aria-selected="false" onclick="itinSetType('general_event',this)">📌 Events</button>
         </div>
         <div class="itin-view-toggle">
           <button class="itin-view-btn active" data-view="compact"  onclick="itinSetView('compact',this)">≡ Compact</button>
@@ -3072,7 +3100,7 @@
       </div>
 
       <!-- Progress bar -->
-      <div class="pk-progress-wrap" id="pkProgressWrap"></div>
+      <div class="pk-progress-wrap" id="pkProgressWrap" aria-live="polite" aria-atomic="true"></div>
 
       <!-- Destination filter (appears automatically when bookings span multiple countries) -->
       <div class="pk-filter-strip" id="pkFilterStrip"></div>
@@ -3248,9 +3276,9 @@
             <!-- Month navigation -->
             <div class="cal-header">
               <div class="cal-nav">
-                <button class="cal-nav-btn" onclick="calPrevMonth()" title="Previous month">‹</button>
+                <button class="cal-nav-btn" onclick="calPrevMonth()" title="Previous month" aria-label="Previous month">‹</button>
                 <div class="cal-month-label" id="calMonthLabel">April 2026</div>
-                <button class="cal-nav-btn" onclick="calNextMonth()" title="Next month">›</button>
+                <button class="cal-nav-btn" onclick="calNextMonth()" title="Next month" aria-label="Next month">›</button>
               </div>
               <button class="cal-today-btn" onclick="calGoToday()">Today</button>
             </div>
@@ -3343,7 +3371,7 @@
       <div class="section-header" style="margin-bottom:20px;">
         <div>
           <h3 style="font-size:1.6rem;margin-bottom:4px;">Weather</h3>
-          <p style="font-size:13.5px;color:var(--text-muted);" id="wx-subtitle">Live 16-day forecasts powered by Open-Meteo</p>
+          <p style="font-size:13.5px;color:var(--text-muted);" id="wx-subtitle">Destinations auto-loaded from your itinerary · Live 16-day forecasts powered by Open-Meteo</p>
         </div>
       </div>
 
@@ -3409,28 +3437,29 @@
 </div>
 
 <!-- ─── New Trip Modal ────────────────────────────────────── -->
-<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="tripModalTitle" onclick="closeModalOutside(event)">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeModal()" aria-label="Close dialog">✕</button>
     <h3 id="tripModalTitle">Plan a New Trip</h3>
     <p class="modal-sub" id="tripModalSub">Add your destination and travel dates to get started.</p>
     <input type="hidden" id="editTripId" value="" />
     <div class="form-group">
-      <label class="form-label">Destination</label>
-      <input class="input" type="text" placeholder="e.g. Lisbon, Portugal" id="newDest" />
+      <label class="form-label" for="newDest">Destination</label>
+      <input class="input" type="text" placeholder="e.g. Lisbon, Portugal" id="newDest" required aria-required="true" aria-describedby="newDestError" />
+      <span id="newDestError" class="field-error" aria-live="polite"></span>
     </div>
     <div class="form-group">
-      <label class="form-label">Description</label>
+      <label class="form-label" for="newDesc">Description</label>
       <input class="input" type="text" placeholder="e.g. Summer wine &amp; culture trip" id="newDesc" />
     </div>
     <div class="form-group form-row">
       <div>
-        <label class="form-label">Departure</label>
-        <input class="input" type="date" id="newFrom" />
+        <label class="form-label" for="newFrom">Departure</label>
+        <input class="input" type="date" id="newFrom" required aria-required="true" />
       </div>
       <div>
-        <label class="form-label">Return</label>
-        <input class="input" type="date" id="newTo" />
+        <label class="form-label" for="newTo">Return</label>
+        <input class="input" type="date" id="newTo" required aria-required="true" />
       </div>
     </div>
     <div class="form-group">
@@ -3456,9 +3485,9 @@
 </div>
 
 <!-- ─── Add / Edit Booking Modal ─────────────────────────── -->
-<div class="modal-overlay" id="bookingModal" onclick="bookingModalOutside(event)">
+<div class="modal-overlay" id="bookingModal" role="dialog" aria-modal="true" aria-labelledby="bm-title" onclick="bookingModalOutside(event)">
   <div class="modal booking-modal">
-    <button class="modal-close" onclick="closeBookingModal()">✕</button>
+    <button class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">✕</button>
 
     <div class="bm-header">
       <h3 id="bm-title">Add Booking</h3>
@@ -3466,12 +3495,12 @@
     </div>
 
     <!-- Type tabs -->
-    <div class="bm-type-tabs" id="bmTypeTabs">
-      <button class="bm-type-tab active" data-type="flight"        onclick="bmSelectType('flight',this)">✈ Flight</button>
-      <button class="bm-type-tab"        data-type="accommodation" onclick="bmSelectType('accommodation',this)">🏨 Stay</button>
-      <button class="bm-type-tab"        data-type="tour_activity" onclick="bmSelectType('tour_activity',this)">🎎 Activity</button>
-      <button class="bm-type-tab"        data-type="transport"     onclick="bmSelectType('transport',this)">🚗 Transport</button>
-      <button class="bm-type-tab"        data-type="general_event" onclick="bmSelectType('general_event',this)">📌 Event</button>
+    <div class="bm-type-tabs" id="bmTypeTabs" role="tablist">
+      <button class="bm-type-tab active" data-type="flight"        role="tab" aria-selected="true"  onclick="bmSelectType('flight',this)">✈ Flight</button>
+      <button class="bm-type-tab"        data-type="accommodation" role="tab" aria-selected="false" onclick="bmSelectType('accommodation',this)">🏨 Stay</button>
+      <button class="bm-type-tab"        data-type="tour_activity" role="tab" aria-selected="false" onclick="bmSelectType('tour_activity',this)">🎎 Activity</button>
+      <button class="bm-type-tab"        data-type="transport"     role="tab" aria-selected="false" onclick="bmSelectType('transport',this)">🚗 Transport</button>
+      <button class="bm-type-tab"        data-type="general_event" role="tab" aria-selected="false" onclick="bmSelectType('general_event',this)">📌 Event</button>
     </div>
 
     <div class="bm-body">
@@ -3480,21 +3509,21 @@
       <div class="bm-section-label">Details</div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" id="bm-label-name">Name / Title</label>
-          <input class="input" id="bm-name" type="text" placeholder="e.g. British Airways LHR→KIX" />
+          <label class="form-label" id="bm-label-name" for="bm-name">Name / Title</label>
+          <input class="input" id="bm-name" type="text" placeholder="e.g. British Airways LHR→KIX" autocomplete="name" />
         </div>
         <div class="form-group">
-          <label class="form-label">Confirmation #</label>
+          <label class="form-label" for="bm-conf">Confirmation #</label>
           <input class="input" id="bm-conf" type="text" placeholder="e.g. ABC123" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" id="bm-label-date">Date</label>
+          <label class="form-label" id="bm-label-date" for="bm-date">Date</label>
           <input class="input" id="bm-date" type="date" />
         </div>
         <div class="form-group">
-          <label class="form-label" id="bm-label-time">Time</label>
+          <label class="form-label" id="bm-label-time" for="bm-time">Time</label>
           <input class="input" id="bm-time" type="time" />
         </div>
       </div>
@@ -3504,36 +3533,36 @@
         <div class="bm-section-label">Flight Details</div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Airline</label>
+            <label class="form-label" for="bm-airline">Airline</label>
             <input class="input" id="bm-airline" type="text" placeholder="e.g. JAL" />
           </div>
           <div class="form-group">
-            <label class="form-label">Flight Number</label>
+            <label class="form-label" for="bm-flightnum">Flight Number</label>
             <input class="input" id="bm-flightnum" type="text" placeholder="e.g. JL44" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">From (Airport Code)</label>
+            <label class="form-label" for="bm-depairport">From (Airport Code)</label>
             <input class="input" id="bm-depairport" type="text" placeholder="e.g. LHR" maxlength="4" style="text-transform:uppercase;" />
           </div>
           <div class="form-group">
-            <label class="form-label">To (Airport Code)</label>
+            <label class="form-label" for="bm-arrairport">To (Airport Code)</label>
             <input class="input" id="bm-arrairport" type="text" placeholder="e.g. KIX" maxlength="4" style="text-transform:uppercase;" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Arrival Date &amp; Time</label>
+            <label class="form-label" for="bm-arrdate">Arrival Date &amp; Time</label>
             <input class="input" id="bm-arrdate" type="date" />
           </div>
           <div class="form-group">
-            <label class="form-label" style="visibility:hidden;">Arrival Time</label>
+            <label class="form-label" for="bm-arrtime" style="visibility:hidden;">Arrival Time</label>
             <input class="input" id="bm-arrtime" type="time" />
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Booking Reference</label>
+          <label class="form-label" for="bm-bookref">Booking Reference</label>
           <input class="input" id="bm-bookref" type="text" placeholder="e.g. GBKY2" />
         </div>
       </div>
@@ -3542,26 +3571,26 @@
       <div class="bm-fields" id="bm-fields-accommodation" style="display:none;">
         <div class="bm-section-label">Accommodation Details</div>
         <div class="form-group">
-          <label class="form-label">Address</label>
-          <input class="input" id="bm-address" type="text" placeholder="e.g. 15 Hanamikoji, Higashiyama, Kyoto" />
+          <label class="form-label" for="bm-address">Address</label>
+          <input class="input" id="bm-address" type="text" placeholder="e.g. 15 Hanamikoji, Higashiyama, Kyoto" autocomplete="street-address" />
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Check-in Date</label>
+            <label class="form-label" for="bm-checkin-date">Check-in Date</label>
             <input class="input" id="bm-checkin-date" type="date" />
           </div>
           <div class="form-group">
-            <label class="form-label">Check-in Time</label>
+            <label class="form-label" for="bm-checkin-time">Check-in Time</label>
             <input class="input" id="bm-checkin-time" type="time" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Check-out Date</label>
+            <label class="form-label" for="bm-checkout-date">Check-out Date</label>
             <input class="input" id="bm-checkout-date" type="date" />
           </div>
           <div class="form-group">
-            <label class="form-label">Check-out Time</label>
+            <label class="form-label" for="bm-checkout-time">Check-out Time</label>
             <input class="input" id="bm-checkout-time" type="time" />
           </div>
         </div>
@@ -3571,15 +3600,15 @@
       <div class="bm-fields" id="bm-fields-tour_activity" style="display:none;">
         <div class="bm-section-label">Activity Details</div>
         <div class="form-group">
-          <label class="form-label">Location / Meeting Point</label>
+          <label class="form-label" for="bm-location">Location / Meeting Point</label>
           <input class="input" id="bm-location" type="text" placeholder="e.g. North gate, Tenryu-ji" />
         </div>
         <div class="form-group">
-          <label class="form-label">Arrival Instructions</label>
+          <label class="form-label" for="bm-arrinstr">Arrival Instructions</label>
           <input class="input" id="bm-arrinstr" type="text" placeholder="e.g. Show e-ticket at entrance" />
         </div>
         <div class="form-group">
-          <label class="form-label">What to Bring <span style="font-weight:400;text-transform:none;letter-spacing:0;">(comma-separated)</span></label>
+          <label class="form-label" for="bm-wtb">What to Bring <span style="font-weight:400;text-transform:none;letter-spacing:0;">(comma-separated)</span></label>
           <input class="input" id="bm-wtb" type="text" placeholder="e.g. Comfortable shoes, Camera, Cash" />
         </div>
       </div>
@@ -3589,7 +3618,7 @@
         <div class="bm-section-label">Transport Details</div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Type</label>
+            <label class="form-label" for="bm-transport-type">Type</label>
             <select class="input" id="bm-transport-type">
               <option value="car">Car hire</option>
               <option value="motorhome">Motorhome</option>
@@ -3600,27 +3629,27 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Provider</label>
+            <label class="form-label" for="bm-provider">Provider</label>
             <input class="input" id="bm-provider" type="text" placeholder="e.g. JR West" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Pickup Location</label>
+            <label class="form-label" for="bm-pickup-loc">Pickup Location</label>
             <input class="input" id="bm-pickup-loc" type="text" placeholder="e.g. Kyoto Station" />
           </div>
           <div class="form-group">
-            <label class="form-label">Pickup Date &amp; Time</label>
+            <label class="form-label" for="bm-pickup-dt">Pickup Date &amp; Time</label>
             <input class="input" id="bm-pickup-dt" type="datetime-local" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Dropoff Location</label>
+            <label class="form-label" for="bm-dropoff-loc">Dropoff Location</label>
             <input class="input" id="bm-dropoff-loc" type="text" placeholder="e.g. Shin-Osaka Station" />
           </div>
           <div class="form-group">
-            <label class="form-label">Dropoff Date &amp; Time</label>
+            <label class="form-label" for="bm-dropoff-dt">Dropoff Date &amp; Time</label>
             <input class="input" id="bm-dropoff-dt" type="datetime-local" />
           </div>
         </div>
@@ -3630,11 +3659,11 @@
       <div class="bm-section-label" style="margin-top:12px;">Price &amp; Tags</div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Price</label>
+          <label class="form-label" for="bm-price">Price</label>
           <input class="input" id="bm-price" type="number" min="0" step="0.01" placeholder="0.00" />
         </div>
         <div class="form-group">
-          <label class="form-label">Currency</label>
+          <label class="form-label" for="bm-currency">Currency</label>
           <select class="input" id="bm-currency">
             <option>GBP</option><option>USD</option><option>EUR</option>
             <option>JPY</option><option>MAD</option><option>AUD</option>
@@ -3642,7 +3671,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Country</label>
+          <label class="form-label" for="bm-country">Country</label>
           <select class="input" id="bm-country">
             <option value="">— Select —</option>
             <option>Japan</option><option>Italy</option><option>Morocco</option>
@@ -3656,7 +3685,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Notes</label>
+        <label class="form-label" for="bm-notes">Notes</label>
         <textarea class="input" id="bm-notes" rows="2" placeholder="Any additional info…" style="resize:vertical;"></textarea>
       </div>
 
@@ -3673,7 +3702,7 @@
 <!-- ─── Import Booking Modal ─────────────────────────────── -->
 <div class="modal-overlay" id="importModal" onclick="importModalOutside(event)">
   <div class="modal import-modal">
-    <button class="modal-close" onclick="closeImportModal()" style="position:absolute;top:16px;right:16px;">✕</button>
+    <button class="modal-close" onclick="closeImportModal()" style="position:absolute;top:16px;right:16px;" aria-label="Close dialog">✕</button>
 
     <!-- Header -->
     <div class="im-header">
@@ -3703,7 +3732,7 @@
         <span class="fp-icon" id="imFpIcon">📄</span>
         <span class="fp-name" id="imFpName"></span>
         <span class="fp-size" id="imFpSize"></span>
-        <button class="fp-remove" onclick="imClearFile()" title="Remove file">✕</button>
+        <button class="fp-remove" onclick="imClearFile()" title="Remove file" aria-label="Remove file">✕</button>
       </div>
     </div>
 
@@ -3779,24 +3808,24 @@ e.g. from an e-mail, booking website, or any confirmation document."
 <!-- ─── New Note Modal ───────────────────────────────────── -->
 <div class="modal-overlay" id="noteModal" onclick="closeNoteModalOutside(event)">
   <div class="modal">
-    <button class="modal-close" onclick="closeNoteModal()">✕</button>
+    <button class="modal-close" onclick="closeNoteModal()" aria-label="Close dialog">✕</button>
     <h3>New Journal Note</h3>
     <p class="modal-sub">Capture a thought, tip, or discovery.</p>
     <div class="form-group">
-      <label class="form-label">Title</label>
+      <label class="form-label" for="noteTitle">Title</label>
       <input class="input" type="text" placeholder="e.g. Hidden gems in Osaka" id="noteTitle" />
     </div>
     <div class="form-group">
-      <label class="form-label">Note</label>
+      <label class="form-label" for="noteBody">Note</label>
       <textarea class="input" rows="5" placeholder="Write your note here…" id="noteBody" style="resize:vertical;"></textarea>
     </div>
     <div class="form-group form-row">
       <div>
-        <label class="form-label">Category</label>
+        <label class="form-label" for="noteCat">Category</label>
         <input class="input" type="text" placeholder="e.g. Dining, Planning…" id="noteCat" />
       </div>
       <div>
-        <label class="form-label">Colour</label>
+        <label class="form-label" for="noteColor">Colour</label>
         <select class="input" id="noteColor">
           <option value="yellow">Golden</option>
           <option value="green">Sage</option>
@@ -3862,11 +3891,32 @@ e.g. from an e-mail, booking website, or any confirmation document."
     const errEl    = document.getElementById('authError');
     const btn      = document.getElementById('authBtn');
 
-    if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; return; }
+    const emailEl    = document.getElementById('authEmail');
+    const passwordEl = document.getElementById('authPassword');
+    if (!email && !password) {
+      errEl.textContent = 'Please enter your email address and password.';
+      emailEl.setAttribute('aria-invalid', 'true');
+      passwordEl.setAttribute('aria-invalid', 'true');
+      return;
+    }
+    if (!email) {
+      errEl.textContent = 'Please enter your email address (e.g. name@example.com).';
+      emailEl.setAttribute('aria-invalid', 'true');
+      return;
+    }
+    if (!password) {
+      errEl.textContent = 'Please enter your password.';
+      passwordEl.setAttribute('aria-invalid', 'true');
+      return;
+    }
     if (_authMode === 'signup' && password !== confirm) {
-      errEl.textContent = 'Passwords do not match.'; return;
+      errEl.textContent = 'Passwords do not match.';
+      passwordEl.setAttribute('aria-invalid', 'true');
+      return;
     }
 
+    emailEl.setAttribute('aria-invalid', 'false');
+    passwordEl.setAttribute('aria-invalid', 'false');
     btn.disabled = true;
     btn.textContent = _authMode === 'signup' ? 'Creating…' : 'Signing in…';
     errEl.textContent = '';
@@ -3883,6 +3933,8 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
     if (result.error) {
       errEl.textContent = result.error.message;
+      emailEl.setAttribute('aria-invalid', 'true');
+      passwordEl.setAttribute('aria-invalid', 'true');
       return;
     }
 
@@ -3904,6 +3956,8 @@ e.g. from an e-mail, booking website, or any confirmation document."
     authShowOverlay();
     document.getElementById('authEmail').value    = '';
     document.getElementById('authPassword').value = '';
+    document.getElementById('authEmail').setAttribute('aria-invalid', 'false');
+    document.getElementById('authPassword').setAttribute('aria-invalid', 'false');
     document.getElementById('authError').textContent = '';
     document.getElementById('authUserBar').textContent = '';
   }
@@ -4038,6 +4092,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     const isDark = html.getAttribute('data-theme') === 'dark';
     html.setAttribute('data-theme', isDark ? 'light' : 'dark');
     themeBtn.textContent = isDark ? '🌙' : '☀️';
+    themeBtn.setAttribute('aria-pressed', isDark ? 'false' : 'true');
   }
 
   /* ─── Navigation ─────────────────────────────────────────── */
@@ -4065,9 +4120,12 @@ e.g. from an e-mail, booking website, or any confirmation document."
   function toggleTripDropdown(e) {
     e.stopPropagation();
     document.getElementById('tripDropdown').classList.toggle('open');
+    const isOpen = document.getElementById('tripDropdown').classList.contains('open');
+    document.getElementById('tripSelector').setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
   function closeTripDropdown() {
     document.getElementById('tripDropdown').classList.remove('open');
+    document.getElementById('tripSelector').setAttribute('aria-expanded', 'false');
   }
   /* ─── Trip persistence ───────────────────────────────────── */
   const TRIPS_KEY = 'wanderlog_trips';
@@ -4102,7 +4160,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     });
     const list  = document.getElementById('tripList');
     list.innerHTML = trips.map(t => `
-      <div class="trip-dropdown-item${t.active ? ' active' : ''}" data-trip-id="${t.id}"
+      <div class="trip-dropdown-item${t.active ? ' active' : ''}" data-trip-id="${t.id}" role="menuitem" tabindex="-1"
            onclick="switchTrip('${t.id}', event)">
         <div class="trip-color-dot" style="background:${t.color};" title="Change colour"
              onclick="openColorPopup('${t.id}', event)"></div>
@@ -4110,8 +4168,8 @@ e.g. from an e-mail, booking website, or any confirmation document."
           <div class="trip-dropdown-dest">${t.name}</div>
           <div class="trip-dropdown-dates">${t.dates}</div>
         </div>
-        <button class="trip-del-btn" onclick="openEditTrip('${t.id}', event)" title="Edit trip" style="opacity:0.5;font-size:13px;">✏️</button>
-        <button class="trip-del-btn" onclick="deleteTrip('${t.id}', event)" title="Remove trip">✕</button>
+        <button class="trip-del-btn" onclick="openEditTrip('${t.id}', event)" title="Edit trip" aria-label="Edit trip" style="opacity:0.5;font-size:13px;">✏️</button>
+        <button class="trip-del-btn" onclick="deleteTrip('${t.id}', event)" title="Remove trip" aria-label="Remove trip">✕</button>
       </div>`).join('');
 
     const active = trips.find(t => t.active) || trips[0];
@@ -4145,6 +4203,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     if (e) e.stopPropagation();
     const trips = tripsLoad();
     if (trips.length <= 1) { showToast('You need at least one trip.', 'error'); return; }
+    if (!confirm('Delete this trip and all its data? This cannot be undone.')) return;
     const wasActive = trips.find(t => t.id === id)?.active;
     const remaining = trips.filter(t => t.id !== id);
     if (wasActive) remaining[0].active = true;
@@ -4328,7 +4387,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
         <div class="pack-item${it.packed ? ' checked' : ''}" onclick="pkToggleItem('${cat.id}','${it.id}')">
           <div class="pack-check">${it.packed ? '✓' : ''}</div>
           <span class="pack-label">${pkEsc(it.name)}${destBadge}</span>
-          <button class="pk-item-del" onclick="event.stopPropagation();pkDeleteItem('${cat.id}','${it.id}')" title="Remove item">×</button>
+          <button class="pk-item-del" onclick="event.stopPropagation();pkDeleteItem('${cat.id}','${it.id}')" title="Remove item" aria-label="Remove item">×</button>
         </div>`;
     }).join('');
 
@@ -4343,7 +4402,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
           <span>${pkEsc(cat.icon)} ${pkEsc(cat.name)}</span>
           <span style="display:flex;align-items:center;gap:8px;">
             <span class="pk-cat-count${allPacked ? ' all-packed' : ''}">${done}/${total}</span>
-            <button class="pk-del-cat-btn" onclick="event.stopPropagation();pkDeleteCategory('${cat.id}')" title="Delete category">🗑</button>
+            <button class="pk-del-cat-btn" onclick="event.stopPropagation();pkDeleteCategory('${cat.id}')" title="Delete category" aria-label="Delete category">🗑</button>
             <span class="pk-cat-collapse">${collapsed ? '▶' : '▼'}</span>
           </span>
         </div>
@@ -4530,6 +4589,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
   function emDelContact(id) {
     const d = emLoad();
     if (d.contacts.length <= 1) return;
+    if (!confirm('Remove this emergency contact?')) return;
     d.contacts = d.contacts.filter(c => c.id !== id);
     emSave(d); renderEmergency();
   }
@@ -4549,6 +4609,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
   function emDelVehicle(id) {
     const d = emLoad();
     if (d.vehicles.length <= 1) return;
+    if (!confirm('Remove this vehicle entry?')) return;
     d.vehicles = d.vehicles.filter(v => v.id !== id);
     emSave(d); renderEmergency();
   }
@@ -4568,6 +4629,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
   function emDelLocal(id) {
     const d = emLoad();
     if (d.localNumbers.length <= 1) return;
+    if (!confirm('Remove this local number entry?')) return;
     d.localNumbers = d.localNumbers.filter(l => l.id !== id);
     emSave(d); renderEmergency();
   }
@@ -4616,7 +4678,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     // ── Personal contacts ──────────────────────────────────────
     const contactRecords = d.contacts.map(c => `
       <div class="em-record" data-em-id="${c.id}">
-        ${d.contacts.length > 1 ? `<button class="em-record-del" onclick="emDelContact('${c.id}')" title="Remove">×</button>` : ''}
+        ${d.contacts.length > 1 ? `<button class="em-record-del" onclick="emDelContact('${c.id}')" title="Remove" aria-label="Remove contact">×</button>` : ''}
         <div class="em-fields-grid">
           <div class="em-field-row">
             <label class="em-field-label">Name</label>
@@ -4642,7 +4704,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     // ── Vehicle / rental ───────────────────────────────────────
     const vehicleRecords = d.vehicles.map(v => `
       <div class="em-record" data-em-id="${v.id}">
-        ${d.vehicles.length > 1 ? `<button class="em-record-del" onclick="emDelVehicle('${v.id}')" title="Remove">×</button>` : ''}
+        ${d.vehicles.length > 1 ? `<button class="em-record-del" onclick="emDelVehicle('${v.id}')" title="Remove" aria-label="Remove vehicle">×</button>` : ''}
         <div class="em-fields-grid">
           <div class="em-field-row">
             <label class="em-field-label">Provider</label>
@@ -4696,7 +4758,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
         </td>
         <td style="width:36px;text-align:center;">
           ${d.localNumbers.length > 1
-            ? `<button class="em-num-del" onclick="emDelLocal('${l.id}')" title="Remove">×</button>`
+            ? `<button class="em-num-del" onclick="emDelLocal('${l.id}')" title="Remove" aria-label="Remove number">×</button>`
             : ''}
         </td>
       </tr>`).join('');
@@ -5043,6 +5105,10 @@ e.g. from an e-mail, booking website, or any confirmation document."
   function closeModal() {
     document.getElementById('modal').classList.remove('open');
     document.getElementById('editTripId').value = '';
+    const destEl  = document.getElementById('newDest');
+    const destErr = document.getElementById('newDestError');
+    if (destEl)  destEl.setAttribute('aria-invalid', 'false');
+    if (destErr) destErr.textContent = '';
   }
   function closeModalOutside(e) { if (e.target.id === 'modal') closeModal(); }
 
@@ -5057,10 +5123,19 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   function _saveEditTrip(id) {
-    const dest = document.getElementById('newDest').value.trim();
+    const dest    = document.getElementById('newDest').value.trim();
+    const destEl  = document.getElementById('newDest');
+    const destErr = document.getElementById('newDestError');
     const from = document.getElementById('newFrom').value;
     const to   = document.getElementById('newTo').value;
-    if (!dest) { showToast('Please enter a destination.', 'error'); return; }
+    if (!dest) {
+      destEl.setAttribute('aria-invalid', 'true');
+      if (destErr) destErr.textContent = 'Please enter a destination city or place name (e.g. Tokyo, Japan).';
+      showToast('Please enter a destination city or place name (e.g. Tokyo, Japan).', 'error');
+      return;
+    }
+    destEl.setAttribute('aria-invalid', 'false');
+    if (destErr) destErr.textContent = '';
     const selected = document.querySelector('#newTripColorSwatches .trip-color-swatch.selected');
     const color = selected ? selected.dataset.color : TRIP_COLORS[0];
     const dateStr = from && to
@@ -5083,11 +5158,19 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   function addTrip() {
-    const dest = document.getElementById('newDest').value.trim();
+    const dest    = document.getElementById('newDest').value.trim();
+    const destEl  = document.getElementById('newDest');
+    const destErr = document.getElementById('newDestError');
     const desc = document.getElementById('newDesc').value.trim();
     const from = document.getElementById('newFrom').value;
     const to   = document.getElementById('newTo').value;
-    if (!dest) return;
+    if (!dest) {
+      destEl.setAttribute('aria-invalid', 'true');
+      if (destErr) destErr.textContent = 'Please enter a destination city or place name (e.g. Tokyo, Japan).';
+      return;
+    }
+    destEl.setAttribute('aria-invalid', 'false');
+    if (destErr) destErr.textContent = '';
     const selected = document.querySelector('#newTripColorSwatches .trip-color-swatch.selected');
     const color = selected ? selected.dataset.color : TRIP_COLORS[0];
     const dateStr = from && to
@@ -5188,8 +5271,8 @@ e.g. from an e-mail, booking website, or any confirmation document."
     bmSnapshotShared();
 
     bmType = type;
-    document.querySelectorAll('.bm-type-tab').forEach(t => t.classList.remove('active'));
-    if (tabEl) tabEl.classList.add('active');
+    document.querySelectorAll('.bm-type-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+    if (tabEl) { tabEl.classList.add('active'); tabEl.setAttribute('aria-selected', 'true'); }
 
     // Hide all type-specific panels
     document.querySelectorAll('.bm-fields').forEach(f => f.style.display = 'none');
@@ -5416,7 +5499,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
   /* ─── Toast notification ─────────────────────────────────── */
   function showToast(msg, type) {
     let t = document.getElementById('appToast');
-    if (!t) { t = document.createElement('div'); t.id = 'appToast'; t.className = 'toast'; document.body.appendChild(t); }
+    if (!t) { t = document.createElement('div'); t.id = 'appToast'; t.className = 'toast'; t.setAttribute('aria-live', 'polite'); t.setAttribute('role', 'status'); document.body.appendChild(t); }
     t.textContent = msg;
     t.className = 'toast' + (type ? ' toast-' + type : '');
     t.classList.add('show');
@@ -5679,6 +5762,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
     const cell = document.createElement('div');
     cell.className = 'cal-day';
     cell.dataset.date = dateStr;
+    cell.setAttribute('tabindex', '0');
 
     if (isOtherMonth) cell.classList.add('other-month');
     if (dateStr === todayStr) cell.classList.add('today');
@@ -5963,7 +6047,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
           <div class="wx-city-name">${wxtEsc(city.displayName)}<span class="wx-country">${wxtEsc(city.country)}</span></div>
           ${city.fetchedAt ? `<div class="wx-updated">Updated ${wxtAge(city.fetchedAt)}</div>` : ''}
         </div>
-        <button class="wx-remove-btn" onclick="wxtRemoveCity('${city.id}')" title="Remove city">✕</button>
+        <button class="wx-remove-btn" onclick="wxtRemoveCity('${city.id}')" title="Remove city" aria-label="Remove city">✕</button>
       </div>`;
 
     if (!f) {
@@ -6129,6 +6213,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
       }
       credit.textContent = `📷 ${photo.credit} · Wikipedia`;
       credit.href = photo.creditUrl || '#';
+      credit.setAttribute('aria-label', `Photo credit: ${photo.credit} on Wikipedia (opens external link)`);
     };
     img.onerror = () => heroApplyUnsplash(heroEl, photo.credit || '');
     img.src = photo.url;
@@ -6294,6 +6379,11 @@ e.g. from an e-mail, booking website, or any confirmation document."
       if (btn) btn.classList.toggle('active', data.unit === u);
     });
     wxtRenderGrid(data, wxtTripDates());
+    // Auto-detect cities from itinerary if none saved yet
+    if (!data.cities.length) {
+      wxtDetectFromBookings();
+      return;
+    }
     // Refresh stale forecasts
     data.cities.forEach(c => {
       const stale = !c.forecast || c.forecast.error ||
@@ -6332,6 +6422,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   /* ── Remove city ──────────────────────────────────────────────── */
   function wxtRemoveCity(id) {
+    if (!confirm('Remove this city from weather?')) return;
     const data = wxtLoad();
     data.cities = data.cities.filter(c => c.id !== id);
     wxtSave(data);
@@ -6518,7 +6609,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
                  onchange="dstRowChange('${dstEscAttr(l.id)}','notes',this.value)" />
         </td>
         <td>
-          <button class="dst-del-btn" onclick="dstDeleteRow('${dstEscAttr(l.id)}')" title="Delete">✕</button>
+          <button class="dst-del-btn" onclick="dstDeleteRow('${dstEscAttr(l.id)}')" title="Delete" aria-label="Delete row">✕</button>
         </td>
       </tr>`).join('');
   }
@@ -6535,6 +6626,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   function dstDeleteRow(id) {
+    if (!confirm('Delete this distance row?')) return;
     const legs = dstLoad().filter(l => l.id !== id);
     dstSave(legs);
     renderDistances();
@@ -6657,7 +6749,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
         `<div class="spd-traveller-chip">
           <input class="spd-traveller-input" value="${spdEscAttr(t)}"
                  onchange="spdUpdateTraveller(${i}, this.value)" />
-          <button class="spd-remove-traveller" onclick="spdRemoveTraveller(${i})" title="Remove">✕</button>
+          <button class="spd-remove-traveller" onclick="spdRemoveTraveller(${i})" title="Remove" aria-label="Remove traveller">✕</button>
         </div>`
       ).join('') +
       `<button class="spd-add-chip" onclick="spdAddTraveller()">+ Add Traveller</button>`;
@@ -6834,7 +6926,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
                   title="Click to cycle">${spdEsc(e.paidBy||data.travellers[0])}</button>
         </td>
         <td>
-          <button class="spd-del-btn" onclick="spdDeleteRow('${spdEscAttr(e.id)}')" title="Delete">✕</button>
+          <button class="spd-del-btn" onclick="spdDeleteRow('${spdEscAttr(e.id)}')" title="Delete" aria-label="Delete expense">✕</button>
         </td>
       </tr>`;
     }).join('');
@@ -6866,6 +6958,7 @@ e.g. from an e-mail, booking website, or any confirmation document."
   }
 
   function spdDeleteRow(id) {
+    if (!confirm('Delete this expense?')) return;
     const data = spdLoad();
     data.expenses = data.expenses.filter(e => e.id !== id);
     spdSaveData(data);
@@ -7376,8 +7469,11 @@ e.g. from an e-mail, booking website, or any confirmation document."
 
   function itinSetType(type, el) {
     itinFilters.type = type;
-    document.querySelectorAll('.itin-type-pill').forEach(p =>
-      p.classList.toggle('active', p.dataset.type === type));
+    document.querySelectorAll('.itin-type-pill').forEach(p => {
+      const isActive = p.dataset.type === type;
+      p.classList.toggle('active', isActive);
+      p.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
     renderItinerary();
   }
 
@@ -7847,6 +7943,42 @@ Omit fields that are genuinely unknown. Never guess dates or prices.`;
         imRefreshAddAllBtn();
       }
     };
+
+    /* ── Trip dropdown keyboard navigation ──────────────────── */
+    const tripSel = document.getElementById('tripSelector');
+    const tripDd  = document.getElementById('tripDropdown');
+    if (tripSel && tripDd) {
+      tripSel.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleTripDropdown(e);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (!tripDd.classList.contains('open')) toggleTripDropdown(e);
+          const items = tripDd.querySelectorAll('.trip-dropdown-item');
+          if (items.length) items[0].focus();
+        } else if (e.key === 'Escape') {
+          closeTripDropdown();
+        }
+      });
+      tripDd.addEventListener('keydown', (e) => {
+        const items = Array.from(tripDd.querySelectorAll('.trip-dropdown-item'));
+        const idx   = items.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (idx < items.length - 1) items[idx + 1].focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (idx <= 0) { closeTripDropdown(); tripSel.focus(); }
+          else items[idx - 1].focus();
+        } else if (e.key === 'Escape') {
+          closeTripDropdown();
+          tripSel.focus();
+        } else if (e.key === 'Tab') {
+          closeTripDropdown();
+        }
+      });
+    }
   });
 
   /* ─── Note modal ─────────────────────────────────────────────── */
