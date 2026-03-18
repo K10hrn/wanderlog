@@ -3381,7 +3381,7 @@
 <script>
   /* ─── Supabase auth + cloud sync ────────────────────────── */
   const SB_URL = 'https://dakfivwleerxwdmlgfif.supabase.co';
-  const SB_KEY = 'sb_publishable_o72ccrGdTdhoV9TjfhEHQg_V2Q_zU9C';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRha2ZpdndsZWVyeHdkbWxnZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NDM0NDUsImV4cCI6MjA4OTMxOTQ0NX0.uRsjz_6DsBNYnrH-jck6EHuftKYEkrBZLSphL8erEq4';
   let sb;
   try { sb = supabase.createClient(SB_URL, SB_KEY); }
   catch(e) { console.warn('Supabase init failed:', e); sb = null; }
