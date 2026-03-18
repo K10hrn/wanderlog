@@ -4996,12 +4996,13 @@
     closeBookingModal();
     bmEditId = null;
     showBookingSuccess(data, isEdit);
-    // Refresh the active panel so the new booking appears immediately
-    const active = document.querySelector('.nav-link.active');
-    if (active) {
-      const match = active.getAttribute('onclick')?.match(/showPanel\('(\w+)'/);
-      if (match) showPanel(match[1], active);
-    } else renderOverview();
+    // Re-render all panels that display booking data
+    if (typeof renderOverview   === 'function') renderOverview();
+    if (typeof renderItinerary  === 'function') renderItinerary();
+    if (typeof renderCalendar   === 'function') renderCalendar();
+    if (typeof renderSpend      === 'function') renderSpend();
+    if (typeof renderDistances  === 'function') renderDistances();
+    if (typeof renderWeather    === 'function') renderWeather();
   }
 
   function showBookingSuccess(data, isEdit) {
