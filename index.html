@@ -7647,11 +7647,15 @@ e.g. from an e-mail, booking website, or any confirmation document."
     };
     localStorage.setItem('wanderlog_import_cfg', JSON.stringify(cfg));
   }
+  // Default edge function URL — API key lives securely in Supabase secrets
+  const IM_DEFAULT_EDGE_URL = 'https://dakfivwleerxwdmlgfif.supabase.co/functions/v1/extract-booking';
+
   function imLoadConfig() {
     try {
       const cfg = JSON.parse(localStorage.getItem('wanderlog_import_cfg') || '{}');
       if (cfg.apiKey)    document.getElementById('imApiKey').value    = cfg.apiKey;
-      if (cfg.edgeUrl)   document.getElementById('imEdgeUrl').value   = cfg.edgeUrl;
+      // Fall back to the built-in edge function URL if nothing saved
+      document.getElementById('imEdgeUrl').value   = cfg.edgeUrl   || IM_DEFAULT_EDGE_URL;
       if (cfg.edgeToken) document.getElementById('imEdgeToken').value = cfg.edgeToken;
     } catch(_) {}
   }
