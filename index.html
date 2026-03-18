@@ -3382,7 +3382,9 @@
   /* ─── Supabase auth + cloud sync ────────────────────────── */
   const SB_URL = 'https://dakfivwleerxwdmlgfif.supabase.co';
   const SB_KEY = 'sb_publishable_o72ccrGdTdhoV9TjfhEHQg_V2Q_zU9C';
-  const sb     = supabase.createClient(SB_URL, SB_KEY);
+  let sb;
+  try { sb = supabase.createClient(SB_URL, SB_KEY); }
+  catch(e) { console.warn('Supabase init failed:', e); sb = null; }
 
   // Static keys synced to cloud. Per-trip dynamic keys (wanderlog_*_trip-X)
   // are discovered at sync time via Object.keys(localStorage).
