@@ -53,7 +53,7 @@ test.describe('Trip Management', () => {
     await page.fill('#newDest', dest);
     await page.fill('#newFrom', '2027-01-10');
     await page.fill('#newTo',   '2027-01-20');
-    await page.locator('.modal .btn-primary').click();
+    await page.locator('#tripModalSaveBtn').click();
     await expect(page.locator('#currentTripName')).toContainText(dest);
   });
 

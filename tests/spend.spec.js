@@ -19,9 +19,9 @@ test.describe('Spend Tracker', () => {
 
   test('can add an expense row', async ({ page }) => {
     const addBtn = page.locator('button', { hasText: /add expense/i });
-    const beforeRows = await page.locator('#spdTbody tr').count();
+    const beforeRows = await page.locator('#spdTbody tr[data-id]').count();
     await addBtn.click();
-    const afterRows = await page.locator('#spdTbody tr').count();
+    const afterRows = await page.locator('#spdTbody tr[data-id]').count();
     expect(afterRows).toBeGreaterThan(beforeRows);
   });
 

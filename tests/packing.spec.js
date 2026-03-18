@@ -19,17 +19,19 @@ test.describe('Packing List', () => {
   });
 
   test('can check a packing item', async ({ page }) => {
-    const checkbox = page.locator('.pack-item input[type="checkbox"]').first();
-    const wasChecked = await checkbox.isChecked();
-    await checkbox.click();
-    expect(await checkbox.isChecked()).toBe(!wasChecked);
+    const item = page.locator('.pack-item').first();
+    const wasChecked = await item.evaluate(el => el.classList.contains('checked'));
+    await item.click();
+    const isChecked = await item.evaluate(el => el.classList.contains('checked'));
+    expect(isChecked).toBe(!wasChecked);
   });
 
   test('checking item updates progress percentage', async ({ page }) => {
     const before = await page.locator('.pk-progress-pct').textContent();
-    const checkbox = page.locator('.pack-item input[type="checkbox"]').first();
-    if (!await checkbox.isChecked()) {
-      await checkbox.click();
+    const item = page.locator('.pack-item').first();
+    const isChecked = await item.evaluate(el => el.classList.contains('checked'));
+    if (!isChecked) {
+      await item.click();
     }
     const after = await page.locator('.pk-progress-pct').textContent();
     // Progress should have changed (unless all items were already checked)
