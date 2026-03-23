@@ -7,7 +7,8 @@ const TEST_PASSWORD = process.env.TEST_PASSWORD || 'testpassword123';
 
 /**
  * Log in via the auth overlay form.
- * Waits for the overlay to disappear before resolving.
+ * Retries up to 3 times with backoff to handle Supabase rate-limiting
+ * when many tests run in quick succession.
  */
 async function login(page) {
   await page.goto('/');
@@ -16,10 +17,22 @@ async function login(page) {
   // If already logged in, overlay won't be visible
   if (await overlay.isHidden()) return;
 
-  await page.fill('#authEmail',    TEST_EMAIL);
-  await page.fill('#authPassword', TEST_PASSWORD);
-  await page.click('#authBtn');
-  await overlay.waitFor({ state: 'hidden', timeout: 15_000 });
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    await page.fill('#authEmail',    TEST_EMAIL);
+    await page.fill('#authPassword', TEST_PASSWORD);
+    await page.click('#authBtn');
+    try {
+      await overlay.waitFor({ state: 'hidden', timeout: 20_000 });
+      return; // success
+    } catch (e) {
+      if (attempt === 3) throw e;
+      // Back off before retrying — Supabase rate-limits rapid auth calls
+      await page.waitForTimeout(4_000 * attempt);
+      // Re-navigate so the form is clean for the next attempt
+      await page.goto('/');
+      await overlay.waitFor({ state: 'visible', timeout: 5_000 });
+    }
+  }
 }
 
 /**
@@ -59,7 +72,7 @@ async function goToTab(page, label) {
  */
 async function openTripDropdown(page) {
   await page.click('#tripSelector');
-  await page.locator('#tripDropdown').waitFor({ state: 'visible', timeout: 5_000 });
+  await page.locator('#tripDropdown').waitFor({ state: 'visible', timeout: 10_000 });
 }
 
 /**

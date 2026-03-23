@@ -95,8 +95,7 @@ test.describe('Trip Management', () => {
     if (count === 0) test.skip();
     const firstName = await items.first().locator('.trip-dropdown-dest').textContent();
     await items.first().click();
-    await page.waitForTimeout(400); // wait for trip switch to complete
-    await expect(page.locator('#currentTripName')).toContainText(firstName.trim());
+    await expect(page.locator('#currentTripName')).toContainText(firstName.trim(), { timeout: 8_000 });
   });
 
   test('can cancel new trip modal', async ({ page }) => {
