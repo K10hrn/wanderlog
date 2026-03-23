@@ -2742,6 +2742,9 @@
         <button class="btn btn-ghost" onclick="pkReset()">Reset All</button>
       </div>
 
+      <!-- Trip weather summary + smart suggestions -->
+      <div id="pkWeatherSummary"></div>
+
       <!-- Progress bar -->
       <div class="pk-progress-wrap" id="pkProgressWrap" aria-live="polite" aria-atomic="true"></div>
 
@@ -3967,8 +3970,281 @@
     el.innerHTML = data.categories.map(cat => pkRenderCategory(cat, data, dests)).join('');
   }
 
+  /* ── WMO weather code → description + emoji ─────────────── */
+  function wmoLabel(code) {
+    if (code === 0)                return { label: 'Clear',        emoji: '☀️' };
+    if (code <= 3)                 return { label: 'Partly cloudy',emoji: '⛅' };
+    if (code <= 48)                return { label: 'Foggy',        emoji: '🌫️' };
+    if (code <= 57)                return { label: 'Drizzle',      emoji: '🌦️' };
+    if (code <= 67)                return { label: 'Rain',         emoji: '🌧️' };
+    if (code <= 77)                return { label: 'Snow',         emoji: '❄️' };
+    if (code <= 82)                return { label: 'Showers',      emoji: '🌦️' };
+    if (code <= 86)                return { label: 'Snow showers', emoji: '🌨️' };
+    return                                { label: 'Thunderstorm', emoji: '⛈️' };
+  }
+
+  /* ── Build per-destination stay summary from bookings ───── */
+  function pkBuildDestSummary() {
+    const bookings = bmGetAll();
+    const trip     = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    const stays    = {}; // city → { from, to, days }
+
+    bookings.forEach(b => {
+      const d = b.data || {};
+      let city = null, from = null, to = null;
+
+      if (b.type === 'accommodation') {
+        city = d.address ? d.address.split(',').slice(-2, -1)[0]?.trim() : d.country;
+        if (!city && d.country) city = d.country;
+        from = d.checkInDate;
+        to   = d.checkOutDate;
+      } else if (b.type === 'tour_activity' && d.location) {
+        city = d.location.split(',')[0].trim();
+        from = to = d.date;
+      } else if (d.country) {
+        city = d.country;
+        from = to = d.date;
+      }
+
+      if (!city || !from) return;
+      if (!stays[city]) stays[city] = { from, to: to || from };
+      else {
+        if (from < stays[city].from) stays[city].from = from;
+        if ((to || from) > stays[city].to) stays[city].to = to || from;
+      }
+    });
+
+    // Calculate nights
+    return Object.entries(stays).map(([city, s]) => {
+      const nights = Math.max(1, Math.round((new Date(s.to) - new Date(s.from)) / 86400000));
+      return { city, from: s.from, to: s.to, nights };
+    });
+  }
+
+  /* ── Match a stay's city to a weather city ───────────────── */
+  function pkMatchWeatherCity(stayCity, weatherCities) {
+    const norm = s => s.toLowerCase().replace(/[^a-z]/g, '');
+    const key  = norm(stayCity);
+    return weatherCities.find(wc => norm(wc.displayName).includes(key) || key.includes(norm(wc.displayName.split(',')[0])));
+  }
+
+  /* ── Derive packing suggestions from weather + stays ─────── */
+  function pkSmartSuggestions(stays, weatherData) {
+    const suggestions = {}; // category → Set of item names
+
+    const add = (cat, item) => {
+      if (!suggestions[cat]) suggestions[cat] = new Set();
+      suggestions[cat].add(item);
+    };
+
+    let totalNights = stays.reduce((s, x) => s + x.nights, 0) || 7;
+    const shirts = Math.min(Math.max(totalNights, 3), 10);
+
+    // Always suggest quantity-based clothing
+    add('👕 Clothing', `T-shirts / casual tops (×${shirts})`);
+    add('👕 Clothing', `Underwear (×${shirts})`);
+    add('👕 Clothing', `Socks (×${shirts})`);
+
+    stays.forEach(stay => {
+      const wc = pkMatchWeatherCity(stay.city, weatherData.cities || []);
+      if (!wc || !wc.forecast?.daily) return;
+
+      const daily   = wc.forecast.daily;
+      const dates   = daily.time || [];
+      // Filter to dates overlapping this stay
+      const indices = dates.reduce((arr, d, i) => (d >= stay.from && d <= stay.to ? [...arr, i] : arr), []);
+      if (!indices.length) return; // fallback: use all
+
+      const temps    = indices.map(i => daily.temperature_2m_max?.[i]).filter(Number.isFinite);
+      const mins     = indices.map(i => daily.temperature_2m_min?.[i]).filter(Number.isFinite);
+      const precip   = indices.map(i => daily.precipitation_sum?.[i] ?? 0);
+      const codes    = indices.map(i => daily.weather_code?.[i] ?? 0);
+
+      const avgMax   = temps.length   ? temps.reduce((a,b)=>a+b,0)/temps.length   : null;
+      const avgMin   = mins.length    ? mins.reduce((a,b)=>a+b,0)/mins.length     : null;
+      const rainyDays= precip.filter(p => p > 3).length;
+      const hasSnow  = codes.some(c => c >= 71 && c <= 77);
+      const hasStorm = codes.some(c => c >= 95);
+
+      const unit = weatherData.unit === 'F' ? 'F' : 'C';
+      const disp = v => v !== null ? `${Math.round(v)}°${unit}` : '?';
+
+      // Hot weather (avg max > 25°C / 77°F)
+      const hotThreshold = unit === 'F' ? 77 : 25;
+      const coldThreshold= unit === 'F' ? 50 : 10;
+      const coolThreshold= unit === 'F' ? 63 : 17;
+
+      if (avgMax !== null && avgMax >= hotThreshold) {
+        add('👕 Clothing', 'Lightweight / breathable clothing');
+        add('👕 Clothing', 'Swimwear');
+        add('🧴 Toiletries', 'High-SPF sunscreen');
+        add('👜 Accessories', 'Sunglasses');
+        add('👜 Accessories', 'Sun hat / cap');
+      }
+
+      // Cold weather (avg min < 10°C / 50°F)
+      if (avgMin !== null && avgMin < coldThreshold) {
+        add('👕 Clothing', 'Warm layers / fleece');
+        add('👕 Clothing', 'Thermal base layer');
+        add('👜 Accessories', 'Gloves');
+        add('👜 Accessories', 'Scarf');
+        add('👜 Accessories', 'Warm hat / beanie');
+        add('👕 Clothing', 'Heavy jacket / coat');
+      } else if (avgMax !== null && avgMax < coolThreshold) {
+        add('👕 Clothing', 'Light jacket / cardigan');
+      }
+
+      // Rain
+      if (rainyDays >= 2) {
+        add('👕 Clothing', 'Waterproof jacket / raincoat');
+        add('👜 Accessories', 'Compact travel umbrella');
+        add('👕 Clothing', 'Waterproof shoes or boots');
+      }
+
+      // Snow
+      if (hasSnow) {
+        add('👕 Clothing', 'Waterproof snow boots');
+        add('👕 Clothing', 'Waterproof trousers');
+        add('👜 Accessories', 'Hand warmers');
+      }
+
+      // Storm
+      if (hasStorm) {
+        add('👜 Accessories', 'Compact travel umbrella');
+        add('👕 Clothing', 'Waterproof jacket / raincoat');
+      }
+    });
+
+    // Always useful travel items
+    add('💊 Health & Medical', 'Travel insurance documents');
+    add('💊 Health & Medical', 'Prescription medications');
+    add('🔌 Tech & Cables',    'Universal travel adapter');
+    add('🔌 Tech & Cables',    'Portable power bank');
+    add('📄 Documents',        'Passport & copies');
+    add('📄 Documents',        'Travel insurance details');
+
+    return suggestions;
+  }
+
+  /* ── Render the weather summary + smart suggestions banner ─ */
+  function pkRenderWeatherSummary() {
+    const el = document.getElementById('pkWeatherSummary');
+    if (!el) return;
+    const stays    = pkBuildDestSummary();
+    const wxData   = (typeof wxtLoad === 'function') ? wxtLoad() : { unit:'C', cities:[] };
+    const hasWx    = wxData.cities.some(c => c.forecast?.daily);
+
+    if (!stays.length) { el.innerHTML = ''; return; }
+
+    // Build city weather cards
+    let cardsHtml = stays.map(stay => {
+      const wc = pkMatchWeatherCity(stay.city, wxData.cities || []);
+      let wxHtml = '';
+      if (wc?.forecast?.daily) {
+        const daily   = wc.forecast.daily;
+        const dates   = daily.time || [];
+        const indices = dates.reduce((arr,d,i)=>(d>=stay.from&&d<=stay.to?[...arr,i]:arr),[]);
+        const use     = indices.length ? indices : dates.map((_,i)=>i);
+        const temps   = use.map(i=>daily.temperature_2m_max?.[i]).filter(Number.isFinite);
+        const mins    = use.map(i=>daily.temperature_2m_min?.[i]).filter(Number.isFinite);
+        const precip  = use.map(i=>daily.precipitation_sum?.[i]??0);
+        const codes   = use.map(i=>daily.weather_code?.[i]??0);
+        const avgMax  = temps.length ? Math.round(temps.reduce((a,b)=>a+b)/temps.length) : null;
+        const avgMin  = mins.length  ? Math.round(mins.reduce((a,b)=>a+b)/mins.length)  : null;
+        const rainy   = precip.filter(p=>p>3).length;
+        // Most common condition
+        const modeCode = codes.sort((a,b)=>codes.filter(x=>x===a).length-codes.filter(x=>x===b).length).pop();
+        const { label, emoji } = wmoLabel(modeCode || 0);
+        const u = wxData.unit === 'F' ? 'F' : 'C';
+        wxHtml = `
+          <div style="font-size:22px;margin-bottom:2px;">${emoji}</div>
+          <div style="font-weight:600;font-size:13px;">${avgMax !== null ? avgMax+'°'+u : ''}${avgMax!==null&&avgMin!==null?' / ':''}${avgMin!==null?avgMin+'°'+u:''}</div>
+          <div style="font-size:11px;color:var(--text-muted);">${label}${rainy>0?' · '+rainy+' rainy day'+(rainy>1?'s':''):''}</div>`;
+      } else {
+        wxHtml = `<div style="font-size:20px;margin-bottom:2px;">📍</div><div style="font-size:11px;color:var(--text-muted);">No weather data</div>`;
+      }
+
+      const nightLabel = stay.nights === 1 ? '1 night' : `${stay.nights} nights`;
+      return `<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center;min-width:110px;flex:1;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${stay.city}">${stay.city}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">${nightLabel}</div>
+        ${wxHtml}
+      </div>`;
+    }).join('');
+
+    // Smart suggestions
+    const suggestions = pkSmartSuggestions(stays, wxData);
+    const pkData      = pkLoad();
+    const existing    = new Set(pkData.categories.flatMap(c => c.items.map(i => i.name.toLowerCase())));
+
+    let suggestRows = '';
+    let totalNew = 0;
+    Object.entries(suggestions).forEach(([cat, items]) => {
+      const newItems = [...items].filter(name => !existing.has(name.toLowerCase()));
+      if (!newItems.length) return;
+      totalNew += newItems.length;
+      suggestRows += `<div style="margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;">${cat}</span>
+        <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;">
+          ${newItems.map(name=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" class="pk-suggest-cb" data-cat="${cat}" data-name="${name}" checked style="accent-color:var(--primary);">
+            ${name}
+          </label>`).join('')}
+        </div>
+      </div>`;
+    });
+
+    const suggestSection = totalNew > 0 ? `
+      <div style="margin-top:16px;padding:14px 16px;background:var(--card-bg);border:1px solid var(--primary);border-radius:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-weight:600;font-size:14px;">✨ Smart Suggestions</div>
+            <div style="font-size:12px;color:var(--text-muted);">Based on your itinerary &amp; weather forecast</div>
+          </div>
+          <button class="btn btn-primary" style="font-size:13px;padding:7px 14px;" onclick="pkAddSuggestions()">Add Selected to List</button>
+        </div>
+        <div id="pkSuggestRows">${suggestRows}</div>
+      </div>` : `<div style="margin-top:12px;font-size:13px;color:var(--text-muted);text-align:center;padding:8px 0;">✓ All smart suggestions already in your packing list</div>`;
+
+    el.innerHTML = `
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-weight:600;font-size:14px;">🗺️ Trip Overview</div>
+          ${!hasWx ? `<button class="btn btn-ghost" style="font-size:12px;padding:5px 10px;" onclick="wxtDetectFromBookings();renderPacking();">Load Weather</button>` : ''}
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">${cardsHtml}</div>
+        ${suggestSection}
+      </div>`;
+  }
+
+  /* ── Add checked suggestions to packing list ─────────────── */
+  function pkAddSuggestions() {
+    const checkboxes = document.querySelectorAll('.pk-suggest-cb:checked');
+    if (!checkboxes.length) return;
+    const data = pkLoad();
+    checkboxes.forEach(cb => {
+      const catLabel = cb.dataset.cat;
+      const name     = cb.dataset.name;
+      // Find or create matching category
+      let cat = data.categories.find(c => c.name === catLabel.replace(/^[^\s]+\s/,''));
+      if (!cat) {
+        const icon = catLabel.match(/^(\S+)/)?.[1] || '📦';
+        const cname= catLabel.replace(/^(\S+)\s*/,'');
+        cat = { id: 'pk-cat-' + Date.now() + Math.random(), icon, name: cname, collapsed: false, items: [] };
+        data.categories.push(cat);
+      }
+      // Don't add duplicates
+      if (!cat.items.find(i => i.name.toLowerCase() === name.toLowerCase())) {
+        cat.items.push({ id: 'pk-' + Date.now() + Math.random(), name, packed: false, dest: 'all' });
+      }
+    });
+    pkSave(data);
+    renderPacking();
+  }
+
   function renderPacking() {
     const data = pkLoad();
+    pkRenderWeatherSummary();
     pkRenderProgress(data);
     pkRenderFilter(data);
     pkRenderCategories(data);
