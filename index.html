@@ -3246,6 +3246,16 @@
       <!-- ── Tour / Activity-specific ────────────────────────── -->
       <div class="bm-fields" id="bm-fields-tour_activity" style="display:none;">
         <div class="bm-section-label">Activity Details</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="bm-act-end-date">End Date</label>
+            <input class="input" id="bm-act-end-date" type="date" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bm-act-end-time">End Time</label>
+            <input class="input" id="bm-act-end-time" type="time" />
+          </div>
+        </div>
         <div class="form-group">
           <label class="form-label" for="bm-location">Location / Meeting Point</label>
           <input class="input" id="bm-location" type="text" placeholder="e.g. North gate, Tenryu-ji" />
@@ -3299,6 +3309,25 @@
             <label class="form-label" for="bm-dropoff-dt">Dropoff Date &amp; Time</label>
             <input class="input" id="bm-dropoff-dt" type="datetime-local" />
           </div>
+        </div>
+      </div>
+
+      <!-- ── General Event-specific ──────────────────────────── -->
+      <div class="bm-fields" id="bm-fields-general_event" style="display:none;">
+        <div class="bm-section-label">Event Details</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="bm-evt-end-date">End Date</label>
+            <input class="input" id="bm-evt-end-date" type="date" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bm-evt-end-time">End Time</label>
+            <input class="input" id="bm-evt-end-time" type="time" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="bm-evt-location">Location</label>
+          <input class="input" id="bm-evt-location" type="text" placeholder="e.g. Shibuya, Tokyo" />
         </div>
       </div>
 
@@ -5188,6 +5217,8 @@
       },
       tour_activity: {
         location:            document.getElementById('bm-location').value.trim(),
+        endDate:             document.getElementById('bm-act-end-date').value || undefined,
+        endTime:             document.getElementById('bm-act-end-time').value || undefined,
         arrivalInstructions: document.getElementById('bm-arrinstr').value.trim() || undefined,
         whatToBring:         document.getElementById('bm-wtb').value.split(',').map(s=>s.trim()).filter(Boolean),
       },
@@ -5199,7 +5230,11 @@
         dropoffLocation:  document.getElementById('bm-dropoff-loc').value.trim(),
         dropoffDateTime:  document.getElementById('bm-dropoff-dt').value,
       },
-      general_event: {},
+      general_event: {
+        location: document.getElementById('bm-evt-location').value.trim() || undefined,
+        endDate:  document.getElementById('bm-evt-end-date').value || undefined,
+        endTime:  document.getElementById('bm-evt-end-time').value || undefined,
+      },
     };
 
     return { ...shared, ...specific[bmType] };
@@ -5240,9 +5275,15 @@
       set('bm-checkout-date', booking.data.checkOutDate);
       set('bm-checkout-time', booking.data.checkOutTime);
     } else if (bmType === 'tour_activity') {
-      set('bm-location', booking.data.location);
-      set('bm-arrinstr', booking.data.arrivalInstructions);
-      set('bm-wtb',      (booking.data.whatToBring||[]).join(', '));
+      set('bm-location',     booking.data.location);
+      set('bm-act-end-date', booking.data.endDate);
+      set('bm-act-end-time', booking.data.endTime);
+      set('bm-arrinstr',     booking.data.arrivalInstructions);
+      set('bm-wtb',          (booking.data.whatToBring||[]).join(', '));
+    } else if (bmType === 'general_event') {
+      set('bm-evt-location', booking.data.location);
+      set('bm-evt-end-date', booking.data.endDate);
+      set('bm-evt-end-time', booking.data.endTime);
     } else if (bmType === 'transport') {
       set('bm-transport-type', booking.data.transportType);
       set('bm-provider',       booking.data.provider);
