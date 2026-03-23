@@ -8,25 +8,25 @@ test.describe('Spend Tracker', () => {
     await goToTab(page, 'Spend');
   });
 
-  test('spend page loads with summary cards', async ({ page }) => {
+  // ── Test 1: Spend page loads with all elements ───────────────────────────────
+  // Navigating to Spend must render the panel, summary cards, expense table,
+  // and budget progress bar in a single pass — all are visible on load and
+  // require no interaction to trigger.
+  test('spend page loads with all elements', async ({ page }) => {
     await expect(page.locator('#panel-budget')).toBeVisible();
     await expect(page.locator('.spd-summary-card').first()).toBeVisible();
-  });
-
-  test('expense table is visible', async ({ page }) => {
     await expect(page.locator('#spdTbody')).toBeVisible();
+    await expect(page.locator('.spd-progress-wrap')).toBeVisible();
   });
 
-  test('can add an expense row', async ({ page }) => {
-    const addBtn = page.locator('button', { hasText: /add expense/i });
+  // ── Test 2: Can add an expense ───────────────────────────────────────────────
+  // Clicks "Add Expense" and verifies a new row is appended to the table.
+  test('can add an expense', async ({ page }) => {
+    const addBtn    = page.locator('button', { hasText: /add expense/i });
     const beforeRows = await page.locator('#spdTbody tr[data-id]').count();
     await addBtn.click();
-    const afterRows = await page.locator('#spdTbody tr[data-id]').count();
+    const afterRows  = await page.locator('#spdTbody tr[data-id]').count();
     expect(afterRows).toBeGreaterThan(beforeRows);
-  });
-
-  test('budget progress bar is visible', async ({ page }) => {
-    await expect(page.locator('.spd-progress-wrap')).toBeVisible();
   });
 
 });

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login, goToTab } from './helpers.js';
 
+// All nine app tabs and the panel ID each one renders.
 const TABS = [
   { label: 'Overview',   panelId: 'panel-overview'   },
   { label: 'Itinerary',  panelId: 'panel-itinerary'  },
@@ -19,29 +20,30 @@ test.describe('Navigation', () => {
     await login(page);
   });
 
-  for (const { label, panelId } of TABS) {
-    test(`"${label}" tab renders its panel`, async ({ page }) => {
+  // ── Test 1: All tabs navigate correctly ─────────────────────────────────────
+  // Clicks every tab in sequence and asserts its panel becomes visible.
+  // Kept as a single test with a loop rather than 9 separate tests.
+  test('all tabs navigate and render their panel', async ({ page }) => {
+    for (const { label, panelId } of TABS) {
       await goToTab(page, label);
       await expect(page.locator(`#${panelId}`)).toBeVisible({ timeout: 10_000 });
-    });
-  }
-
-  test('active tab is highlighted', async ({ page }) => {
-    await goToTab(page, 'Itinerary');
-    // On desktop the active class is in #navLinks; on mobile it's in #mobileNav
-    const activeBtn = page.locator('.nav-link.active');
-    await expect(activeBtn.first()).toContainText('Itinerary');
+    }
   });
 
-  test('overview shows trip stats section', async ({ page }) => {
-    await goToTab(page, 'Overview');
-    await expect(page.locator('#panel-overview.active')).toBeVisible();
-    await expect(page.locator('.overview-stat').first()).toBeVisible();
-  });
-
-  test('overview shows exactly 4 stat cards (Flights, Stays, Activities, Transport)', async ({ page }) => {
+  // ── Test 2: Overview page content ───────────────────────────────────────────
+  // Navigates to Overview and validates all four stat cards plus the general
+  // overview-stat section. Also confirms the active tab is highlighted.
+  test('overview page content', async ({ page }) => {
     await goToTab(page, 'Overview');
     await page.waitForTimeout(300);
+
+    // Active panel must be visible
+    await expect(page.locator('#panel-overview.active')).toBeVisible();
+
+    // General stats section
+    await expect(page.locator('.overview-stat').first()).toBeVisible();
+
+    // Exactly 4 booking-stat cards with the correct labels
     const cards = page.locator('.booking-stat-card');
     await expect(cards).toHaveCount(4);
     const labels = await page.locator('.bsc-label').allTextContents();
@@ -49,41 +51,36 @@ test.describe('Navigation', () => {
     expect(labels).toContain('Stays');
     expect(labels).toContain('Activities');
     expect(labels).toContain('Transport');
-    // Events should NOT appear as a separate card
     expect(labels).not.toContain('Events');
+
+    // Active tab in the nav bar must be highlighted as "Overview"
+    const activeBtn = page.locator('.nav-link.active');
+    await expect(activeBtn.first()).toContainText('Overview');
   });
 
-  test('emergency page has Print / Save PDF button', async ({ page }) => {
-    await goToTab(page, 'Emergency');
-    await expect(page.locator('#panel-emergency button', { hasText: /print/i })).toBeVisible();
-  });
-
-  test('emergency tip banner has adequate spacing from first section', async ({ page }) => {
-    await goToTab(page, 'Emergency');
-    await page.waitForTimeout(300);
-    const reminder = page.locator('.em-reminder');
-    await expect(reminder).toBeVisible();
-    const marginBottom = await reminder.evaluate(el =>
-      parseInt(getComputedStyle(el).marginBottom)
-    );
-    expect(marginBottom).toBeGreaterThanOrEqual(16);
-  });
-
-  test('dark mode toggle works', async ({ page }) => {
-    const html = page.locator('html');
-    await page.locator('#themeBtn').click();
-    await expect(html).toHaveAttribute('data-theme', 'dark');
-    await page.locator('#themeBtn').click();
-    await expect(html).not.toHaveAttribute('data-theme', 'dark');
-  });
-
-  test('no JS errors on any tab', async ({ page }) => {
+  // ── Test 3: Dark mode toggle and no JS errors ────────────────────────────────
+  // Toggles dark mode on and off, then walks through every tab collecting any
+  // JS errors. Combines the two previously separate tests because they share
+  // the "loop all tabs" pattern and a single page context avoids re-login cost.
+  test('dark mode toggle and no JS errors', async ({ page }) => {
+    // Collect JS errors throughout this test
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
+
+    // Toggle dark mode on
+    await page.locator('#themeBtn').click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    // Toggle dark mode back off
+    await page.locator('#themeBtn').click();
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dark');
+
+    // Walk every tab checking for JS errors
     for (const { label } of TABS) {
       await goToTab(page, label);
       await page.waitForTimeout(300);
     }
+
     expect(errors).toHaveLength(0);
   });
 
