@@ -3065,6 +3065,7 @@
           <h3 style="font-size:1.6rem;margin-bottom:4px;">Emergency Info</h3>
           <p style="font-size:13.5px;color:var(--text-muted);">Critical contacts &amp; numbers — keep a printed copy</p>
         </div>
+        <button class="btn btn-ghost" onclick="emPrint()" aria-label="Print or save as PDF">🖨 Print / Save PDF</button>
       </div>
       <div id="emContent"></div>
     </div>
@@ -4399,6 +4400,34 @@
   }
 
   // ── Render ────────────────────────────────────────────────────
+  function emPrint() {
+    const trip = (tripsLoad().find(t => t.active) || tripsLoad()[0])?.name || 'Trip';
+    const content = document.getElementById('emContent')?.innerHTML || '';
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+      <title>Emergency Info — ${trip}</title>
+      <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 40px auto; color: #2a2015; font-size: 14px; }
+        h1 { font-size: 22px; border-bottom: 2px solid #2a2015; padding-bottom: 8px; margin-bottom: 20px; }
+        h3 { font-size: 15px; margin: 20px 0 8px; }
+        .em-section { margin-bottom: 24px; border: 1px solid #ccc; border-radius: 8px; padding: 14px 18px; }
+        .em-section-title { font-weight: bold; font-size: 15px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 5px 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+        td:first-child { font-weight: 600; width: 40%; color: #555; }
+        button, .btn, input, select, [onclick] { display: none !important; }
+        @media print { @page { margin: 20mm; } }
+      </style>
+    </head><body>
+      <h1>🚨 Emergency Info — ${trip}</h1>
+      ${content}
+      <p style="margin-top:40px;font-size:11px;color:#999;">Printed from Wanderlog</p>
+    </body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 500);
+  }
+
   function renderEmergency() {
     const d = emLoad();
     const el = document.getElementById('emContent');
