@@ -4064,7 +4064,41 @@
     const wxData   = (typeof wxtLoad === 'function') ? wxtLoad() : { unit:'C', cities:[] };
     const hasWx    = wxData.cities.some(c => c.forecast?.daily);
 
-    if (!stays.length) { el.innerHTML = ''; return; }
+    // Always show suggestions even for a new trip with no bookings yet
+    if (!stays.length) {
+      const wxData  = (typeof wxtLoad === 'function') ? wxtLoad() : { unit:'C', cities:[] };
+      const suggestions = pkSmartSuggestions([], wxData);
+      const pkData  = pkLoad();
+      const existing = new Set(pkData.categories.flatMap(c => c.items.map(i => i.name.toLowerCase())));
+      let suggestRows = '';
+      let totalNew = 0;
+      Object.entries(suggestions).forEach(([cat, items]) => {
+        const newItems = [...items].filter(name => !existing.has(name.toLowerCase()));
+        if (!newItems.length) return;
+        totalNew += newItems.length;
+        suggestRows += `<div style="margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;">${cat}</span>
+          <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;">
+            ${newItems.map(name=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" class="pk-suggest-cb" data-cat="${cat}" data-name="${name}" checked style="accent-color:var(--primary);">
+              ${name}
+            </label>`).join('')}
+          </div>
+        </div>`;
+      });
+      el.innerHTML = totalNew > 0 ? `
+        <div style="margin-bottom:20px;padding:14px 16px;background:var(--card-bg);border:1px solid var(--primary);border-radius:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="font-weight:600;font-size:14px;">✨ Smart Suggestions</div>
+              <div style="font-size:12px;color:var(--text-muted);">Essentials based on your trip length — add bookings for weather-based suggestions</div>
+            </div>
+            <button class="btn btn-primary" style="font-size:13px;padding:7px 14px;" onclick="pkAddSuggestions()">Add Selected to List</button>
+          </div>
+          <div id="pkSuggestRows">${suggestRows}</div>
+        </div>` : '';
+      return;
+    }
 
     // Build city weather cards
     let cardsHtml = stays.map(stay => {
@@ -4959,8 +4993,17 @@
     trips.push({ id: 'trip-' + Date.now(), name: dest, dates: dateStr, color, active: true, from, to });
     tripsSave(trips);
     tripsRender();
-    renderOverview();
     closeModal();
+    // Re-render all panels for the new trip
+    renderOverview();
+    renderItinerary();
+    renderCalendar();
+    renderSpend();
+    renderDistances();
+    renderWeather();
+    renderPacking();
+    renderEmergency();
+    showPanel('overview');
   }
 
   function openColorPopup(tripId, e) {
