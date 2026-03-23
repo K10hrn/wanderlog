@@ -74,8 +74,11 @@ test.describe('Trip Management', () => {
     const otherItems = page.locator('.trip-dropdown-item:not(.active)');
     const count      = await otherItems.count();
     if (count > 0) {
-      const firstName = await otherItems.first().locator('.trip-dropdown-dest').textContent();
-      await otherItems.first().click();
+      const destLocator = otherItems.first().locator('.trip-dropdown-dest');
+      const firstName = await destLocator.textContent();
+      // Click the destination text specifically — avoids accidentally hitting
+      // the colour dot which opens the colour picker instead of switching trips
+      await destLocator.click();
       await expect(page.locator('#currentTripName')).toContainText(firstName.trim(), { timeout: 8_000 });
     }
 
