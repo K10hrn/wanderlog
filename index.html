@@ -6268,7 +6268,7 @@
         const name = b.data?.name || b.data?.route || b.data?.description || '—';
         const time = ovTime(b);
         const esc  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        return `<div class="tl-item" ondblclick="openAddEventModal('${b.id}')">
+        return `<div class="tl-item" onclick="openAddEventModal('${b.id}')">
           <div class="tl-dot" style="background:${m.fg};"></div>
           <div class="tl-icon">${m.icon}</div>
           <div class="tl-body">
