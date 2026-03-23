@@ -5179,7 +5179,22 @@
       localStorage.setItem('wanderlog_bookings_trip-1', localStorage.getItem(legacyKey));
       localStorage.removeItem(legacyKey);
     }
-    return JSON.parse(localStorage.getItem(tripKey) || '[]');
+    const bookings = JSON.parse(localStorage.getItem(tripKey) || '[]');
+    // Backfill data.date for any existing bookings that are missing it
+    let patched = false;
+    bookings.forEach(b => {
+      if (!b.data) return;
+      if (!b.data.date) {
+        if (b.type === 'accommodation' && b.data.checkInDate)
+          { b.data.date = b.data.checkInDate; patched = true; }
+        else if (b.type === 'transport' && b.data.pickupDateTime)
+          { b.data.date = b.data.pickupDateTime.split('T')[0]; patched = true; }
+        else if (b.type === 'flight' && b.data.departureDateTime)
+          { b.data.date = b.data.departureDateTime.split('T')[0]; patched = true; }
+      }
+    });
+    if (patched) localStorage.setItem(tripKey, JSON.stringify(bookings));
+    return bookings;
   }
   function bmSaveAll(arr) {
     localStorage.setItem(bmTripKey(), JSON.stringify(arr));
@@ -5299,6 +5314,16 @@
     if (!data.name && !data.airline && !data.provider) {
       document.getElementById('bm-name').focus();
       return;
+    }
+
+    // Normalise data.date so every booking type has a reliable primary date
+    if (!data.date) {
+      if (bmType === 'accommodation' && data.checkInDate)
+        data.date = data.checkInDate;
+      else if (bmType === 'transport' && data.pickupDateTime)
+        data.date = data.pickupDateTime.split('T')[0];
+      else if (bmType === 'flight' && data.departureDateTime)
+        data.date = data.departureDateTime.split('T')[0];
     }
 
     const all = bmGetAll();
