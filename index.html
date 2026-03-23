@@ -3978,80 +3978,66 @@
     };
 
     let totalNights = stays.reduce((s, x) => s + x.nights, 0) || 1;
-    const shirts = Math.min(totalNights + 1, 14); // +1 spare, capped at 14
+    // Cap at 7 — assume laundry on longer trips
+    const qty = Math.min(totalNights + 1, 7);
 
-    // Always suggest quantity-based clothing
-    add('👕 Clothing', `T-shirts / casual tops (×${shirts})`);
-    add('👕 Clothing', `Underwear (×${shirts})`);
-    add('👕 Clothing', `Socks (×${shirts})`);
+    // Core essentials only
+    add('👕 Clothing', `T-shirts / casual tops (×${qty})`);
+    add('👕 Clothing', `Underwear (×${qty})`);
+    add('👕 Clothing', `Socks (×${qty})`);
+
+    // Track items suggested across stays to avoid duplicates
+    const suggested = new Set();
+    const once = (cat, item) => { if (!suggested.has(item)) { suggested.add(item); add(cat, item); } };
 
     stays.forEach(stay => {
       const wc = pkMatchWeatherCity(stay.city, weatherData.cities || []);
       if (!wc || !wc.forecast?.daily) return;
 
-      const daily   = wc.forecast.daily;
-      const dates   = daily.time || [];
-      // Filter to dates overlapping this stay
-      const indices = dates.reduce((arr, d, i) => (d >= stay.from && d <= stay.to ? [...arr, i] : arr), []);
-      if (!indices.length) return; // fallback: use all
+      const daily    = wc.forecast.daily;
+      const dates    = daily.time || [];
+      const indices  = dates.reduce((arr, d, i) => (d >= stay.from && d <= stay.to ? [...arr, i] : arr), []);
+      if (!indices.length) return;
 
       const temps    = indices.map(i => daily.temperature_2m_max?.[i]).filter(Number.isFinite);
       const mins     = indices.map(i => daily.temperature_2m_min?.[i]).filter(Number.isFinite);
       const precip   = indices.map(i => daily.precipitation_sum?.[i] ?? 0);
       const codes    = indices.map(i => daily.weather_code?.[i] ?? 0);
 
-      const avgMax   = temps.length   ? temps.reduce((a,b)=>a+b,0)/temps.length   : null;
-      const avgMin   = mins.length    ? mins.reduce((a,b)=>a+b,0)/mins.length     : null;
+      const avgMax   = temps.length ? temps.reduce((a,b)=>a+b,0)/temps.length : null;
+      const avgMin   = mins.length  ? mins.reduce((a,b)=>a+b,0)/mins.length   : null;
       const rainyDays= precip.filter(p => p > 3).length;
       const hasSnow  = codes.some(c => c >= 71 && c <= 77);
-      const hasStorm = codes.some(c => c >= 95);
 
-      const unit = weatherData.unit === 'F' ? 'F' : 'C';
-      const disp = v => v !== null ? `${Math.round(v)}°${unit}` : '?';
-
-      // Hot weather (avg max > 25°C / 77°F)
+      const unit         = weatherData.unit === 'F' ? 'F' : 'C';
       const hotThreshold = unit === 'F' ? 77 : 25;
-      const coldThreshold= unit === 'F' ? 50 : 10;
+      const coldThreshold= unit === 'F' ? 46 : 8;
       const coolThreshold= unit === 'F' ? 63 : 17;
 
+      // Hot: swimwear + sun essentials only
       if (avgMax !== null && avgMax >= hotThreshold) {
-        add('👕 Clothing', 'Lightweight / breathable clothing');
-        add('👕 Clothing', 'Swimwear');
-        add('🧴 Toiletries', 'High-SPF sunscreen');
-        add('👜 Accessories', 'Sunglasses');
-        add('👜 Accessories', 'Sun hat / cap');
+        once('👕 Clothing',    'Swimwear');
+        once('🧴 Toiletries',  'High-SPF sunscreen');
+        once('👜 Accessories', 'Sunglasses');
       }
 
-      // Cold weather (avg min < 10°C / 50°F)
+      // Cold: one jacket + one layer
       if (avgMin !== null && avgMin < coldThreshold) {
-        add('👕 Clothing', 'Warm layers / fleece');
-        add('👕 Clothing', 'Thermal base layer');
-        add('👜 Accessories', 'Gloves');
-        add('👜 Accessories', 'Scarf');
-        add('👜 Accessories', 'Warm hat / beanie');
-        add('👕 Clothing', 'Heavy jacket / coat');
+        once('👕 Clothing', 'Heavy coat / jacket');
+        once('👕 Clothing', 'Warm layers');
       } else if (avgMax !== null && avgMax < coolThreshold) {
-        add('👕 Clothing', 'Light jacket / cardigan');
+        once('👕 Clothing', 'Light jacket / cardigan');
       }
 
-      // Rain
-      if (rainyDays >= 2) {
-        add('👕 Clothing', 'Waterproof jacket / raincoat');
-        add('👜 Accessories', 'Compact travel umbrella');
-        add('👕 Clothing', 'Waterproof shoes or boots');
+      // Rain: only if 3+ rainy days
+      if (rainyDays >= 3) {
+        once('👕 Clothing',    'Waterproof jacket / raincoat');
+        once('👜 Accessories', 'Compact travel umbrella');
       }
 
       // Snow
       if (hasSnow) {
-        add('👕 Clothing', 'Waterproof snow boots');
-        add('👕 Clothing', 'Waterproof trousers');
-        add('👜 Accessories', 'Hand warmers');
-      }
-
-      // Storm
-      if (hasStorm) {
-        add('👜 Accessories', 'Compact travel umbrella');
-        add('👕 Clothing', 'Waterproof jacket / raincoat');
+        once('👕 Clothing', 'Waterproof snow boots');
       }
     });
 
