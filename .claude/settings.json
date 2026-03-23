@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "agent",
+            "timeout": 360,
+            "statusMessage": "Checking tests after commit…",
+            "prompt": "Read the JSON on stdin. Check tool_input.command — if it does NOT contain 'git commit', stop immediately and do nothing.\n\nAlso stop immediately if the commit message (visible in tool_input.command or tool_response) starts with 'Update Playwright tests' — that is a test-only commit and should not trigger another test cycle.\n\nOtherwise, do ALL of the following in order:\n\n1. Run: cd \"/Users/kelly.kenyon@glean.co/Documents/AI Testing\" && git diff HEAD~1 --stat\n   to see which files changed in the commit.\n\n2. Run: cd \"/Users/kelly.kenyon@glean.co/Documents/AI Testing\" && git diff HEAD~1 -- index.html\n   to understand what app behaviour changed (new selectors, new features, removed elements, etc.).\n\n3. Read every file in tests/ that is relevant to the changed code. Decide whether any test needs updating — e.g. a new selector was added, a feature was removed, a label changed.\n\n4. Edit those test files so they accurately reflect the new app behaviour. Do not delete tests unless the feature they cover was removed. Add new tests if a clearly-testable new feature was added.\n\n5. Kill any stale server then run the full suite:\n   pkill -f 'python3 -m http.server 3456' 2>/dev/null; sleep 1\n   cd \"/Users/kelly.kenyon@glean.co/Documents/AI Testing\" && node_modules/.bin/playwright test --reporter=list\n\n6. If tests fail, read the error output, fix the tests, and run again (repeat until all pass or you have diagnosed a genuine app bug).\n\n7. If you edited any test files, commit them:\n   cd \"/Users/kelly.kenyon@glean.co/Documents/AI Testing\" && git add tests/ playwright.config.js && git commit -m 'Update Playwright tests to reflect latest changes'\n   then push: git push\n\n8. Report a brief summary: how many tests pass, which (if any) tests you updated, and any app bugs found."
+          }
+        ]
+      }
+    ]
+  }
+}
