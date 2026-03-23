@@ -3977,7 +3977,11 @@
       suggestions[cat].add(item);
     };
 
-    let totalNights = stays.reduce((s, x) => s + x.nights, 0) || 1;
+    // Use actual trip duration rather than summing individual stays
+    const _trip = tripsLoad().find(t => t.active) || tripsLoad()[0];
+    const totalNights = (_trip?.from && _trip?.to)
+      ? Math.max(1, Math.round((new Date(_trip.to) - new Date(_trip.from)) / 86400000))
+      : Math.max(1, stays.reduce((s, x) => s + x.nights, 0));
     // Cap at 7 — assume laundry on longer trips
     const qty = Math.min(totalNights + 1, 7);
 
