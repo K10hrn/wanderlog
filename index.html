@@ -3779,76 +3779,7 @@
   }
 
   function pkDefault() {
-    return {
-      filterDest: 'all',
-      categories: [
-        {
-          id: 'pk-clothing', icon: '👕', name: 'Clothing', collapsed: false,
-          items: [
-            { id: 'pk-c1', name: 'Light jacket',               packed: false, dest: 'all' },
-            { id: 'pk-c2', name: 'Rain poncho',                packed: false, dest: 'all' },
-            { id: 'pk-c3', name: 'Comfortable walking shoes',  packed: false, dest: 'all' },
-            { id: 'pk-c4', name: 'Casual shirts (×5)',         packed: false, dest: 'all' },
-            { id: 'pk-c5', name: 'Smart dinner outfit',        packed: false, dest: 'all' },
-            { id: 'pk-c6', name: 'Pyjamas',                    packed: false, dest: 'all' },
-            { id: 'pk-c7', name: 'Socks (×6)',                 packed: false, dest: 'all' },
-            { id: 'pk-c8', name: 'Underwear (×6)',             packed: false, dest: 'all' },
-            { id: 'pk-c9', name: 'Sunhat',                     packed: false, dest: 'all' },
-            { id: 'pk-c10', name: 'Swimwear',                  packed: false, dest: 'all' },
-          ]
-        },
-        {
-          id: 'pk-health', icon: '💊', name: 'Health & Toiletries', collapsed: false,
-          items: [
-            { id: 'pk-h1', name: 'Sunscreen SPF50',        packed: false, dest: 'all' },
-            { id: 'pk-h2', name: 'Insect repellent',       packed: false, dest: 'all' },
-            { id: 'pk-h3', name: 'Paracetamol',            packed: false, dest: 'all' },
-            { id: 'pk-h4', name: 'Antihistamine',          packed: false, dest: 'all' },
-            { id: 'pk-h5', name: 'Travel sickness tabs',   packed: false, dest: 'all' },
-            { id: 'pk-h6', name: 'Plasters',               packed: false, dest: 'all' },
-            { id: 'pk-h7', name: 'Hand sanitiser',         packed: false, dest: 'all' },
-            { id: 'pk-h8', name: 'Face masks (×10)',       packed: false, dest: 'all' },
-            { id: 'pk-h9', name: 'Toothbrush & paste',     packed: false, dest: 'all' },
-            { id: 'pk-h10', name: 'Razor',                 packed: false, dest: 'all' },
-          ]
-        },
-        {
-          id: 'pk-tech', icon: '🔌', name: 'Tech & Gadgets', collapsed: false,
-          items: [
-            { id: 'pk-t1', name: 'Phone charger',                  packed: false, dest: 'all' },
-            { id: 'pk-t2', name: 'Universal adapter',              packed: false, dest: 'all' },
-            { id: 'pk-t3', name: 'Power bank',                     packed: false, dest: 'all' },
-            { id: 'pk-t4', name: 'Noise-cancelling headphones',    packed: false, dest: 'all' },
-            { id: 'pk-t5', name: 'Camera body',                    packed: false, dest: 'all' },
-            { id: 'pk-t6', name: 'Spare SD cards',                 packed: false, dest: 'all' },
-            { id: 'pk-t7', name: 'Laptop',                         packed: false, dest: 'all' },
-            { id: 'pk-t8', name: 'Kindle',                         packed: false, dest: 'all' },
-            { id: 'pk-t9', name: 'USB-C hub',                      packed: false, dest: 'all' },
-          ]
-        },
-        {
-          id: 'pk-docs', icon: '📄', name: 'Documents', collapsed: false,
-          items: [
-            { id: 'pk-d1', name: 'Passport',                packed: false, dest: 'all' },
-            { id: 'pk-d2', name: 'Flight e-tickets',        packed: false, dest: 'all' },
-            { id: 'pk-d3', name: 'Hotel confirmations',     packed: false, dest: 'all' },
-            { id: 'pk-d4', name: 'Travel insurance docs',   packed: false, dest: 'all' },
-            { id: 'pk-d5', name: 'Emergency contacts',      packed: false, dest: 'all' },
-            { id: 'pk-d6', name: 'Credit card (no-fee)',    packed: false, dest: 'all' },
-          ]
-        },
-        {
-          id: 'pk-misc', icon: '🎒', name: 'Miscellaneous', collapsed: false,
-          items: [
-            { id: 'pk-m1', name: 'Day backpack',            packed: false, dest: 'all' },
-            { id: 'pk-m2', name: 'Reusable water bottle',   packed: false, dest: 'all' },
-            { id: 'pk-m3', name: 'Padlock (luggage)',       packed: false, dest: 'all' },
-            { id: 'pk-m4', name: 'Eye mask & earplugs',     packed: false, dest: 'all' },
-            { id: 'pk-m5', name: 'Snacks for travel day',   packed: false, dest: 'all' },
-          ]
-        },
-      ]
-    };
+    return { filterDest: 'all', categories: [] };
   }
 
   function pkLoad() {
@@ -3966,6 +3897,14 @@
   function pkRenderCategories(data) {
     const el = document.getElementById('pkCategories');
     if (!el) return;
+    if (!data.categories.length) {
+      el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+        <div style="font-size:36px;margin-bottom:12px;">🧳</div>
+        <div style="font-weight:600;margin-bottom:6px;">Your packing list is empty</div>
+        <div style="font-size:13px;">Use the smart suggestions above to get started,<br>or add a custom category below.</div>
+      </div>`;
+      return;
+    }
     const dests = pkGetDestinations();
     el.innerHTML = data.categories.map(cat => pkRenderCategory(cat, data, dests)).join('');
   }
@@ -4037,8 +3976,8 @@
       suggestions[cat].add(item);
     };
 
-    let totalNights = stays.reduce((s, x) => s + x.nights, 0) || 7;
-    const shirts = Math.min(Math.max(totalNights, 3), 10);
+    let totalNights = stays.reduce((s, x) => s + x.nights, 0) || 1;
+    const shirts = Math.min(totalNights + 1, 14); // +1 spare, capped at 14
 
     // Always suggest quantity-based clothing
     add('👕 Clothing', `T-shirts / casual tops (×${shirts})`);
