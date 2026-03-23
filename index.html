@@ -6204,8 +6204,21 @@
       transport:     { label:'Transport', icon:'🚗', bg:'var(--sand)',        fg:'var(--brown-mid)' },
       general_event: { label:'Event',     icon:'📌', bg:'#EAE6F0',           fg:'#6B5B8A' },
     };
-    function ovDate(b) { return b.data?.date || b.data?.checkIn || b.data?.startDate || ''; }
-    function ovTime(b) { return b.data?.time || b.data?.checkInTime || ''; }
+    function ovDate(b) {
+      const d = b.data || {};
+      return d.date
+        || (d.departureDateTime || '').split('T')[0]
+        || d.checkInDate
+        || (d.pickupDateTime  || '').split('T')[0]
+        || '';
+    }
+    function ovTime(b) {
+      const d = b.data || {};
+      if (d.time) return d.time;
+      const dt = d.departureDateTime || d.pickupDateTime || '';
+      if (dt.includes('T')) return dt.split('T')[1].slice(0, 5);
+      return d.checkInTime || '';
+    }
     function ovFmtDate(iso) {
       if (!iso) return '';
       const d = new Date(iso + 'T00:00:00');
