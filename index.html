@@ -6115,14 +6115,16 @@
       <div class="overview-stat"><span class="overview-stat-val">${ret}</span><span class="overview-stat-lbl">Return</span></div>`;
 
     /* ── Stat cards ── */
-    const counts = { flight: 0, accommodation: 0, tour_activity: 0, transport: 0, general_event: 0 };
-    bookings.forEach(b => { if (counts[b.type] !== undefined) counts[b.type]++; });
+    const counts = { flight: 0, accommodation: 0, tour_activity: 0, transport: 0 };
+    bookings.forEach(b => {
+      if (b.type === 'general_event') counts.tour_activity++;
+      else if (counts[b.type] !== undefined) counts[b.type]++;
+    });
     const cardDefs = [
       { type: 'flight',        icon: '✈',  label: 'Flights',    bg: 'var(--primary-bg)', fg: 'var(--primary)' },
       { type: 'accommodation', icon: '🏨', label: 'Stays',      bg: '#EDE8E0',           fg: '#7A5C3A' },
-      { type: 'tour_activity', icon: '🎎', label: 'Activities', bg: 'var(--accent-bg)',  fg: 'var(--accent)' },
+      { type: 'tour_activity', icon: '🎭', label: 'Activities', bg: 'var(--accent-bg)',  fg: 'var(--accent)' },
       { type: 'transport',     icon: '🚃', label: 'Transport',  bg: 'var(--sand)',        fg: 'var(--brown-mid)' },
-      { type: 'general_event', icon: '📌', label: 'Events',     bg: '#EAE6F0',           fg: '#6B5B8A' },
     ];
     const cardEl = document.getElementById('overviewStatCards');
     if (cardEl) {
