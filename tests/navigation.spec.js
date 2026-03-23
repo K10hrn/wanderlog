@@ -1,12 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { login, goToTab } from './helpers.js';
 
-// All nine app tabs and the panel ID each one renders.
+// All eight app tabs and the panel ID each one renders.
 const TABS = [
   { label: 'Overview',   panelId: 'panel-overview'   },
   { label: 'Itinerary',  panelId: 'panel-itinerary'  },
   { label: 'Calendar',   panelId: 'panel-calendar'   },
-  { label: 'Distances',  panelId: 'panel-distances'  },
   { label: 'Spend',      panelId: 'panel-budget'     },
   { label: 'Weather',    panelId: 'panel-weather'    },
   { label: 'Packing',    panelId: 'panel-packing'    },

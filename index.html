@@ -1633,77 +1633,6 @@
     }
     [data-theme="dark"] .spd-settlement { background: var(--accent-bg); }
 
-    /* ─── Distances page ────────────────────────────────────────── */
-    .dst-summary {
-      display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;
-    }
-    .dst-summary-card {
-      background: var(--surface); border: 1.5px solid var(--divider);
-      border-radius: 14px; padding: 16px 22px; display: flex;
-      flex-direction: column; gap: 3px; min-width: 160px; flex: 1;
-    }
-    .dst-summary-card.accent { border-color: var(--primary); background: var(--primary-bg); }
-    .dst-summary-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.05em; color: var(--text-muted);
-    }
-    .dst-summary-value {
-      font-family: 'Playfair Display', serif; font-size: 1.55rem;
-      font-weight: 700; color: var(--text); line-height: 1.15;
-    }
-    .dst-summary-sub { font-size: 12px; color: var(--text-muted); }
-
-    .dst-table-wrap {
-      overflow-x: auto; border: 1.5px solid var(--divider);
-      border-radius: 14px; margin-bottom: 20px;
-    }
-    .dst-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-    .dst-table th {
-      padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
-      background: var(--sand); border-bottom: 1.5px solid var(--divider); white-space: nowrap;
-    }
-    .dst-table td {
-      padding: 6px 10px; border-bottom: 1px solid var(--divider); vertical-align: middle;
-    }
-    .dst-table tr:last-child td { border-bottom: none; }
-    .dst-table tbody tr:hover td { background: var(--surface); }
-    .dst-table input[type="text"],
-    .dst-table input[type="number"],
-    .dst-table input[type="date"] {
-      background: none; border: none; font-family: 'Inter', sans-serif;
-      font-size: 13.5px; color: var(--text); outline: none; padding: 2px 0; width: 100%;
-    }
-    .dst-table input[type="number"] { width: 72px; text-align: right; }
-    .dst-table input[type="date"]   { width: 120px; }
-    .dst-table input:focus { border-bottom: 1.5px solid var(--primary); }
-    .dst-origin-input  { min-width: 120px; }
-    .dst-dest-input    { min-width: 120px; }
-    .dst-time-input    { width: 80px; }
-    .dst-notes-input   { min-width: 140px; }
-    .dst-del-btn {
-      background: none; border: none; color: var(--text-muted); cursor: pointer;
-      font-size: 14px; padding: 2px 5px; border-radius: 5px; transition: all 0.15s;
-      min-width: 24px; min-height: 24px;
-    }
-    .dst-del-btn:hover { color: var(--accent); background: var(--accent-bg); }
-    .dst-table-footer {
-      padding: 11px 14px; background: var(--surface);
-      border-top: 1.5px solid var(--divider);
-    }
-    .dst-arrow {
-      color: var(--text-muted); font-size: 13px; padding: 0 2px; user-select: none;
-    }
-    .dst-leg-num {
-      font-size: 11px; font-weight: 700; color: var(--text-muted);
-      background: var(--sand); border-radius: 10px; padding: 1px 7px;
-      white-space: nowrap;
-    }
-    @media (max-width: 700px) {
-      .dst-table th:nth-child(5),
-      .dst-table td:nth-child(5) { display: none; } /* hide date on small screens */
-    }
-
     /* ─── Weather page ──────────────────────────────────────────── */
     .wx-toolbar {
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -2616,7 +2545,6 @@
         <button class="nav-link active" onclick="showPanel('overview',this)"><span class="nl-icon">🗺</span> Overview</button>
         <button class="nav-link" onclick="showPanel('itinerary',this)"><span class="nl-icon">📅</span> Itinerary</button>
         <button class="nav-link" onclick="showPanel('calendar',this)"><span class="nl-icon">📆</span> Calendar</button>
-        <button class="nav-link" onclick="showPanel('distances',this)"><span class="nl-icon">📍</span> Distances</button>
         <button class="nav-link" onclick="showPanel('budget',this)"><span class="nl-icon">💴</span> Spend</button>
         <button class="nav-link" onclick="showPanel('weather',this)"><span class="nl-icon">🌤</span> Weather</button>
         <button class="nav-link" onclick="showPanel('packing',this)"><span class="nl-icon">🧳</span> Packing</button>
@@ -2637,7 +2565,6 @@
       <button class="nav-link" onclick="showPanel('overview',this);closeMobileNav()"><span class="nl-icon">🗺</span> Overview</button>
       <button class="nav-link" onclick="showPanel('itinerary',this);closeMobileNav()"><span class="nl-icon">📅</span> Itinerary</button>
       <button class="nav-link" onclick="showPanel('calendar',this);closeMobileNav()"><span class="nl-icon">📆</span> Calendar</button>
-      <button class="nav-link" onclick="showPanel('distances',this);closeMobileNav()"><span class="nl-icon">📍</span> Distances</button>
       <button class="nav-link" onclick="showPanel('budget',this);closeMobileNav()"><span class="nl-icon">💴</span> Spend</button>
       <button class="nav-link" onclick="showPanel('weather',this);closeMobileNav()"><span class="nl-icon">🌤</span> Weather</button>
       <button class="nav-link" onclick="showPanel('packing',this);closeMobileNav()"><span class="nl-icon">🧳</span> Packing</button>
@@ -2968,45 +2895,6 @@
 
         </div>
       </div>
-    </div>
-
-    <!-- Distances -->
-    <div class="panel" id="panel-distances">
-
-      <!-- Header -->
-      <div class="section-header" style="margin-bottom:20px;">
-        <div>
-          <h3 style="font-size:1.6rem;margin-bottom:4px;">Distances</h3>
-          <p style="font-size:13.5px;color:var(--text-muted);">Driving legs &amp; journey times for your trip</p>
-        </div>
-      </div>
-
-      <!-- Summary cards -->
-      <div class="dst-summary" id="dstSummary"></div>
-
-      <!-- Table -->
-      <div class="dst-table-wrap">
-        <table class="dst-table">
-          <thead>
-            <tr>
-              <th style="width:36px;">#</th>
-              <th>Origin</th>
-              <th style="width:22px;"></th>
-              <th>Destination</th>
-              <th style="text-align:right;">Distance (km)</th>
-              <th>Drive Time</th>
-              <th>Date</th>
-              <th>Notes</th>
-              <th style="width:32px;"></th>
-            </tr>
-          </thead>
-          <tbody id="dstTbody"></tbody>
-        </table>
-        <div class="dst-table-footer">
-          <button class="btn btn-primary" style="font-size:13px;padding:7px 16px;" onclick="dstAddRow()">+ Add Leg</button>
-        </div>
-      </div>
-
     </div>
 
     <!-- Weather -->
@@ -3683,7 +3571,6 @@
     if (id === 'itinerary')  renderItinerary();
     if (id === 'calendar')   renderCalendar();
     if (id === 'budget')     renderSpend();
-    if (id === 'distances')  renderDistances();
     if (id === 'weather')    renderWeather();
     if (id === 'emergency')  renderEmergency();
     if (id === 'print')      renderPrint();
@@ -3769,7 +3656,6 @@
     if (typeof renderCalendar   === 'function') renderCalendar();
     if (typeof renderWeather    === 'function') renderWeather();
     if (typeof renderSpend      === 'function') renderSpend();
-    if (typeof renderDistances  === 'function') renderDistances();
     if (typeof renderPacking    === 'function') renderPacking();
     if (typeof renderEmergency  === 'function') renderEmergency();
   }
@@ -4668,7 +4554,6 @@
 
     const bookings = bmGetAll();
     const em       = emLoad();
-    const legs     = dstLoad();
     const spend    = spdLoad();
     const tripName = document.getElementById('currentTripName')?.textContent?.trim() || 'My Trip';
     const generated = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -4753,40 +4638,6 @@
             ${groups[dateStr].map(bookingRow).join('')}
           </div>`;
       });
-    }
-
-    // ── Driving legs section ───────────────────────────────────
-    let distHtml = '';
-    if (legs.length > 0) {
-      const totalKm   = legs.reduce((s, l) => s + (parseFloat(l.distanceKm) || 0), 0);
-      const totalMins = legs.reduce((s, l) => s + dstParseMinutes(l.driveTime || ''), 0);
-      const summary   = [
-        `${legs.length} leg${legs.length !== 1 ? 's' : ''}`,
-        totalKm > 0 ? `${totalKm.toFixed(0)} km` : null,
-        totalMins > 0 ? dstFmtTime(totalMins) + ' total drive time' : null,
-      ].filter(Boolean).join(' · ');
-      distHtml = `
-        <div class="prt-section">
-          <div class="prt-section-title">🗺 Driving Legs — ${esc(summary)}</div>
-          <table class="prt-table">
-            <thead>
-              <tr>
-                <th>From</th><th>To</th><th>Distance</th><th>Drive time</th><th>Date</th><th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${legs.map(l => `
-                <tr>
-                  <td>${esc(l.origin || '—')}</td>
-                  <td>${esc(l.destination || '—')}</td>
-                  <td>${esc(l.distanceKm ? l.distanceKm + ' km' : '—')}</td>
-                  <td>${esc(l.driveTime || '—')}</td>
-                  <td>${l.date ? esc(itinFmtDate(l.date)) : '—'}</td>
-                  <td>${esc(l.notes || '')}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>`;
     }
 
     // ── Spend summary section ──────────────────────────────────
@@ -4893,7 +4744,6 @@
           ${itinHtml}
         </div>
 
-        ${distHtml}
         ${spendHtml}
         ${emHtml}
 
@@ -5027,7 +4877,6 @@
     renderItinerary();
     renderCalendar();
     renderSpend();
-    renderDistances();
     renderWeather();
     renderPacking();
     renderEmergency();
@@ -5349,7 +5198,6 @@
     if (typeof renderItinerary  === 'function') renderItinerary();
     if (typeof renderCalendar   === 'function') renderCalendar();
     if (typeof renderSpend      === 'function') renderSpend();
-    if (typeof renderDistances  === 'function') renderDistances();
     if (typeof renderWeather    === 'function') renderWeather();
   }
 
@@ -6395,186 +6243,6 @@
   class LinkedSet extends Set {}
 
   /* ═══════════════════════════════════════════════════════════════
-   *  DISTANCES
-   * ═══════════════════════════════════════════════════════════════ */
-
-  const DST_KEY_BASE = 'wanderlog_distances';
-  function dstTripKey() {
-    const active = tripsLoad().find(t => t.active) || tripsLoad()[0];
-    return DST_KEY_BASE + '_' + (active?.id || 'default');
-  }
-
-  function dstLoad() {
-    try {
-      const raw = localStorage.getItem(dstTripKey());
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
-  }
-
-  function dstSave(legs) {
-    localStorage.setItem(dstTripKey(), JSON.stringify(legs));
-  }
-
-  function dstEsc(str) {
-    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-  function dstEscAttr(str) {
-    return String(str ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-  }
-
-  /* ── Parse drive time string → total minutes ─────────────────── */
-  function dstParseMinutes(str) {
-    if (!str) return 0;
-    const s = String(str).trim().toLowerCase();
-    // Formats: "2h 30m", "2h30m", "2h", "90m", "90 min", "1:30", "1:30:00"
-    let m = s.match(/^(\d+):(\d+)(?::\d+)?$/); // HH:MM or HH:MM:SS
-    if (m) return parseInt(m[1]) * 60 + parseInt(m[2]);
-    let total = 0;
-    const hm = s.match(/(\d+(?:\.\d+)?)\s*h/);
-    const mm = s.match(/(\d+(?:\.\d+)?)\s*m(?:in)?/);
-    if (hm) total += parseFloat(hm[1]) * 60;
-    if (mm) total += parseFloat(mm[1]);
-    if (!hm && !mm) {
-      // plain number → assume minutes
-      const n = parseFloat(s);
-      if (!isNaN(n)) total = n;
-    }
-    return Math.round(total);
-  }
-
-  /* ── Format minutes → "Xh Ym" ───────────────────────────────── */
-  function dstFmtTime(mins) {
-    if (!mins || isNaN(mins)) return '—';
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h === 0) return `${m}m`;
-    if (m === 0) return `${h}h`;
-    return `${h}h ${m}m`;
-  }
-
-  /* ── Summary ─────────────────────────────────────────────────── */
-  function dstRenderSummary(legs) {
-    const el = document.getElementById('dstSummary');
-    if (!el) return;
-    let totalKm = 0, totalMins = 0;
-    legs.forEach(l => {
-      const km = parseFloat(l.distanceKm);
-      if (!isNaN(km)) totalKm += km;
-      totalMins += dstParseMinutes(l.driveTime);
-    });
-    const kmFmt = totalKm > 0
-      ? totalKm.toLocaleString('en', {maximumFractionDigits: 0}) + ' km'
-      : '— km';
-    el.innerHTML = `
-      <div class="dst-summary-card accent">
-        <div class="dst-summary-label">Total Distance</div>
-        <div class="dst-summary-value">${kmFmt}</div>
-        <div class="dst-summary-sub">${legs.length} leg${legs.length !== 1 ? 's' : ''}</div>
-      </div>
-      <div class="dst-summary-card">
-        <div class="dst-summary-label">Total Drive Time</div>
-        <div class="dst-summary-value">${dstFmtTime(totalMins)}</div>
-        <div class="dst-summary-sub">estimated</div>
-      </div>`;
-  }
-
-  /* ── Table ───────────────────────────────────────────────────── */
-  function dstRenderTable(legs) {
-    const tbody = document.getElementById('dstTbody');
-    if (!tbody) return;
-    if (legs.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:2.5rem;
-        color:var(--text-muted);font-style:italic;">
-        No legs yet — click "+ Add Leg" to get started</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = legs.map((l, idx) => `
-      <tr data-id="${dstEscAttr(l.id)}">
-        <td><span class="dst-leg-num">${idx + 1}</span></td>
-        <td>
-          <input class="dst-origin-input" type="text" value="${dstEscAttr(l.origin)}"
-                 placeholder="From…"
-                 onchange="dstRowChange('${dstEscAttr(l.id)}','origin',this.value)" />
-        </td>
-        <td><span class="dst-arrow">→</span></td>
-        <td>
-          <input class="dst-dest-input" type="text" value="${dstEscAttr(l.destination)}"
-                 placeholder="To…"
-                 onchange="dstRowChange('${dstEscAttr(l.id)}','destination',this.value)" />
-        </td>
-        <td style="text-align:right;">
-          <input type="number" step="0.1" min="0" value="${dstEscAttr(l.distanceKm)}"
-                 placeholder="0"
-                 onchange="dstRowChange('${dstEscAttr(l.id)}','distanceKm',this.value)" />
-        </td>
-        <td>
-          <input class="dst-time-input" type="text" value="${dstEscAttr(l.driveTime)}"
-                 placeholder="e.g. 2h 30m"
-                 onchange="dstRowChange('${dstEscAttr(l.id)}','driveTime',this.value)" />
-        </td>
-        <td>
-          <input type="date" value="${dstEscAttr(l.date)}"
-                 onchange="dstRowChange('${dstEscAttr(l.id)}','date',this.value)" />
-        </td>
-        <td>
-          <input class="dst-notes-input" type="text" value="${dstEscAttr(l.notes)}"
-                 placeholder="Notes…"
-                 onchange="dstRowChange('${dstEscAttr(l.id)}','notes',this.value)" />
-        </td>
-        <td>
-          <button class="dst-del-btn" onclick="dstDeleteRow('${dstEscAttr(l.id)}')" title="Delete" aria-label="Delete row">✕</button>
-        </td>
-      </tr>`).join('');
-  }
-
-  /* ── CRUD ────────────────────────────────────────────────────── */
-  function dstRowChange(id, field, value) {
-    const legs = dstLoad();
-    const leg  = legs.find(l => l.id === id);
-    if (!leg) return;
-    leg[field] = value;
-    dstSave(legs);
-    // Only re-render summary (not table, to preserve focus)
-    dstRenderSummary(legs);
-  }
-
-  function dstDeleteRow(id) {
-    if (!confirm('Delete this distance row?')) return;
-    const legs = dstLoad().filter(l => l.id !== id);
-    dstSave(legs);
-    renderDistances();
-  }
-
-  function dstAddRow() {
-    const legs = dstLoad();
-    legs.push({
-      id:          crypto.randomUUID(),
-      origin:      '',
-      destination: '',
-      distanceKm:  '',
-      driveTime:   '',
-      date:        '',
-      notes:       '',
-      created_at:  new Date().toISOString()
-    });
-    dstSave(legs);
-    renderDistances();
-    // Focus the first input of the new row
-    setTimeout(() => {
-      const tbody = document.getElementById('dstTbody');
-      const lastRow = tbody?.querySelector('tr:last-child input');
-      if (lastRow) lastRow.focus();
-    }, 50);
-  }
-
-  /* ── Main render ─────────────────────────────────────────────── */
-  function renderDistances() {
-    const legs = dstLoad();
-    dstRenderSummary(legs);
-    dstRenderTable(legs);
-  }
-
-  /* ═══════════════════════════════════════════════════════════════
    *  SPEND TRACKER
    * ═══════════════════════════════════════════════════════════════ */
 
@@ -7485,13 +7153,6 @@
     spdSaveData = function(data) {
       _spdOrig(data);
       cloudAutoSync(spdTripKey(), data);
-    };
-
-    // Distances — per-trip key
-    const _dstOrig = dstSave;
-    dstSave = function(legs) {
-      _dstOrig(legs);
-      cloudAutoSync(dstTripKey(), legs);
     };
 
     // Packing — per-trip key
