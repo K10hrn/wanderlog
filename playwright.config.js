@@ -11,6 +11,13 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }], ['list']],
   timeout: 30_000,
 
+  webServer: {
+    command: 'python3 -m http.server 3456',
+    port: 3456,
+    reuseExistingServer: !process.env.CI,
+    timeout: 10_000,
+  },
+
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3456',
     trace: 'on-first-retry',

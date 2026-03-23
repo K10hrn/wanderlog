@@ -32,11 +32,34 @@ async function logout(page) {
 
 /**
  * Click a nav tab by its visible label text.
- * Nav items use class .nav-link (not .nav-btn).
+ * On desktop the #navLinks bar is used; on mobile (≤760px) the
+ * hamburger + #mobileNav is used instead.
  */
 async function goToTab(page, label) {
-  await page.locator('#navLinks .nav-link', { hasText: label }).first().click();
+  const navLinks = page.locator('#navLinks');
+  const isDesktop = await navLinks.isVisible();
+
+  if (isDesktop) {
+    await page.locator('#navLinks .nav-link', { hasText: label }).first().click();
+  } else {
+    // Open hamburger menu if not already open
+    const mobileNav = page.locator('#mobileNav');
+    const isOpen = await mobileNav.evaluate(el => el.classList.contains('open'));
+    if (!isOpen) {
+      await page.locator('#hamburger').click();
+      await mobileNav.waitFor({ state: 'visible', timeout: 3_000 });
+    }
+    await page.locator('#mobileNav .nav-link', { hasText: label }).first().click();
+  }
   await page.waitForTimeout(300);
+}
+
+/**
+ * Open the trip selector dropdown and wait for it to be visible.
+ */
+async function openTripDropdown(page) {
+  await page.click('#tripSelector');
+  await page.locator('#tripDropdown').waitFor({ state: 'visible', timeout: 5_000 });
 }
 
 /**
@@ -49,4 +72,4 @@ async function dismissSuccess(page) {
   }
 }
 
-export { login, logout, goToTab, dismissSuccess, TEST_EMAIL, TEST_PASSWORD };
+export { login, logout, goToTab, openTripDropdown, dismissSuccess, TEST_EMAIL, TEST_PASSWORD };

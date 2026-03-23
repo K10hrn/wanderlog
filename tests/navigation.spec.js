@@ -28,15 +28,45 @@ test.describe('Navigation', () => {
 
   test('active tab is highlighted', async ({ page }) => {
     await goToTab(page, 'Itinerary');
-    const activeBtn = page.locator('#navLinks .nav-link.active');
-    await expect(activeBtn).toContainText('Itinerary');
+    // On desktop the active class is in #navLinks; on mobile it's in #mobileNav
+    const activeBtn = page.locator('.nav-link.active');
+    await expect(activeBtn.first()).toContainText('Itinerary');
   });
 
-  test('overview shows trip stats cards', async ({ page }) => {
+  test('overview shows trip stats section', async ({ page }) => {
     await goToTab(page, 'Overview');
     await expect(page.locator('#panel-overview.active')).toBeVisible();
-    // Stats section — overview-stat or overview-stat-card
     await expect(page.locator('.overview-stat').first()).toBeVisible();
+  });
+
+  test('overview shows exactly 4 stat cards (Flights, Stays, Activities, Transport)', async ({ page }) => {
+    await goToTab(page, 'Overview');
+    await page.waitForTimeout(300);
+    const cards = page.locator('.booking-stat-card');
+    await expect(cards).toHaveCount(4);
+    const labels = await page.locator('.bsc-label').allTextContents();
+    expect(labels).toContain('Flights');
+    expect(labels).toContain('Stays');
+    expect(labels).toContain('Activities');
+    expect(labels).toContain('Transport');
+    // Events should NOT appear as a separate card
+    expect(labels).not.toContain('Events');
+  });
+
+  test('emergency page has Print / Save PDF button', async ({ page }) => {
+    await goToTab(page, 'Emergency');
+    await expect(page.locator('#panel-emergency button', { hasText: /print/i })).toBeVisible();
+  });
+
+  test('emergency tip banner has adequate spacing from first section', async ({ page }) => {
+    await goToTab(page, 'Emergency');
+    await page.waitForTimeout(300);
+    const reminder = page.locator('.em-reminder');
+    await expect(reminder).toBeVisible();
+    const marginBottom = await reminder.evaluate(el =>
+      parseInt(getComputedStyle(el).marginBottom)
+    );
+    expect(marginBottom).toBeGreaterThanOrEqual(16);
   });
 
   test('dark mode toggle works', async ({ page }) => {
