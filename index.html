@@ -3164,7 +3164,7 @@
           <input class="input" id="bm-conf" type="text" placeholder="e.g. ABC123" />
         </div>
       </div>
-      <div class="form-row">
+      <div class="form-row" id="bm-shared-date-row">
         <div class="form-group">
           <label class="form-label" id="bm-label-date" for="bm-date">Date</label>
           <input class="input" id="bm-date" type="date" />
@@ -5098,6 +5098,12 @@
     document.querySelectorAll('.bm-fields').forEach(f => f.style.display = 'none');
     const panel = document.getElementById('bm-fields-' + type);
     if (panel) panel.style.display = '';
+
+    // Hide shared date/time for types that have their own date fields
+    const sharedDateRow = document.getElementById('bm-shared-date-row');
+    if (sharedDateRow) {
+      sharedDateRow.style.display = (type === 'accommodation' || type === 'transport') ? 'none' : '';
+    }
 
     // Update label hints
     const meta = BM_TYPE_META[type];
