@@ -27,12 +27,6 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Start local server
-        run: |
-          python3 -m http.server 3456 &
-          sleep 2
-        working-directory: .
-
       - name: Run Playwright tests
         run: npx playwright test --project=chromium
         env:
