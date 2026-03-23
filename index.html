@@ -1258,7 +1258,7 @@
 
     .tl-item {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 12px;
       padding: 12px 14px;
       border-radius: 10px;
@@ -1272,8 +1272,8 @@
     .tl-dot {
       width: 8px; height: 8px;
       border-radius: 50%;
-      margin-top: 6px;
       flex-shrink: 0;
+      align-self: center;
     }
 
     .tl-icon {
@@ -1281,10 +1281,9 @@
       width: 32px;
       text-align: center;
       flex-shrink: 0;
-      margin-top: 1px;
     }
 
-    .tl-body { flex: 1; }
+    .tl-body { flex: 1; align-self: center; }
 
     .tl-type-badge {
       display: inline-flex;
