@@ -6195,28 +6195,53 @@
     const data = wxtLoad(); data.unit = unit; wxtSave(data); renderWeather();
   }
 
+  /* ── Expand common country abbreviations for geocoding ───────── */
+  const WXT_COUNTRY_EXPAND = {
+    'uk': 'United Kingdom', 'gb': 'United Kingdom', 'us': 'United States',
+    'usa': 'United States', 'uae': 'United Arab Emirates', 'eu': 'Europe',
+  };
+  function wxtExpandCountry(name) {
+    return WXT_COUNTRY_EXPAND[name.trim().toLowerCase()] || name;
+  }
+
   /* ── Auto-detect cities from bookings ────────────────────────── */
   async function wxtDetectFromBookings() {
     const btn = document.getElementById('wxDetectBtn');
     if (btn) { btn.textContent = '…'; btn.disabled = true; }
     try {
       const data     = wxtLoad();
+      // Remove previously auto-detected cities so stale results (e.g. wrong country) get replaced
+      data.cities    = data.cities.filter(c => !c.autoDetected);
       const existing = new Set(data.cities.map(c => c.displayName.toLowerCase()));
       // Build candidate query list, most-specific first
       const queries  = new LinkedSet();
+      console.log('[WX Detect] bookings:', JSON.stringify(bmGetAll()));
       bmGetAll().forEach(b => {
-        const d = b.data || {};
+        const d       = b.data || {};
+        const country = d.country ? wxtExpandCountry(d.country) : '';
+        const withCountry = (place) => country ? `${place}, ${country}` : place;
         if (b.type === 'tour_activity' && d.location) {
           const city = d.location.split(',')[0].trim();
-          if (city) queries.add(d.country ? `${city}, ${d.country}` : city);
+          if (city) queries.add(withCountry(city));
         } else if (b.type === 'accommodation' && d.address) {
           const parts = d.address.split(',').map(s => s.trim()).filter(Boolean);
           const city  = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
-          if (city) queries.add(d.country ? `${city}, ${d.country}` : city);
-        } else if (d.country) {
-          queries.add(d.country);
+          if (city) queries.add(withCountry(city));
+        } else if (b.type === 'flight') {
+          // Prefer arrival airport code, then booking name, then country alone
+          if (d.arrivalAirport) queries.add(withCountry(d.arrivalAirport));
+          else if (d.name)      queries.add(withCountry(d.name));
+          else if (country)     queries.add(country);
+        } else if (b.type === 'transport' && d.dropoffLocation) {
+          queries.add(withCountry(d.dropoffLocation.split(',')[0].trim()));
+        } else if (b.type === 'general_event' && d.location) {
+          const city = d.location.split(',')[0].trim();
+          if (city) queries.add(withCountry(city));
+        } else if (country) {
+          queries.add(country);
         }
       });
+      console.log('[WX Detect] queries:', [...queries]);
       if (!queries.size) { alert('No destinations found in your bookings. Add some bookings first!'); return; }
       let added = 0;
       for (const query of queries) {
@@ -6224,7 +6249,7 @@
           const geo = await wxtGeocode(query);
           if (existing.has(geo.displayName.toLowerCase())) continue;
           existing.add(geo.displayName.toLowerCase());
-          data.cities.push({ id: crypto.randomUUID(), ...geo, forecast: null, fetchedAt: null });
+          data.cities.push({ id: crypto.randomUUID(), ...geo, forecast: null, fetchedAt: null, autoDetected: true });
           added++;
         } catch { /* skip unresolvable */ }
       }
