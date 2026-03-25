@@ -175,16 +175,11 @@ test.describe('Bookings', () => {
 
     // Find and open the saved booking from the Overview timeline
     await goToTab(page, 'Overview');
-    const card = page.locator('.booking-card', { hasText: 'To Edit' });
-    if (await card.isVisible()) {
-      await card.click();
-    } else {
-      // Fallback: open via JS API if the card isn't rendered on the timeline
-      await page.evaluate(() => {
-        const b = bmGetAll().find(x => x.data?.name === 'To Edit');
-        if (b) openAddEventModal(b.id);
-      });
-    }
+    // Overview renders timeline items as .tl-item (not .booking-card)
+    const card = page.locator('.tl-item', { hasText: 'To Edit' }).first();
+    await expect(card).toBeVisible({ timeout: 5000 });
+    await card.click();
+    await expect(page.locator('#bookingModal')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('#bm-delete-btn')).toBeVisible();
     await expect(page.locator('#bm-delete-btn')).toContainText('Delete');
   });
