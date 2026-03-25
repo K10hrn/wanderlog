@@ -3716,14 +3716,9 @@
   }
 
   function pkGetDestinations() {
-    const dests = new Set();
-    bmGetAll().forEach(b => {
-      const d = b.data;
-      if (d.country)   dests.add(d.country);
-      if (d.location)  dests.add(d.location.split(',')[0].trim());
-      if (d.address)   dests.add(d.address.split(',').pop().trim());
-    });
-    return Array.from(dests).filter(Boolean).slice(0, 20);
+    // Use the same city names as pkBuildDestSummary so filter chips
+    // always match the dest tags on suggested items
+    return pkBuildDestSummary().map(s => s.city).filter(Boolean).slice(0, 20);
   }
 
   function pkFilteredItems(cat, filterDest) {
@@ -3886,29 +3881,32 @@
 
   /* ── Derive packing suggestions from weather + stays ─────── */
   function pkSmartSuggestions(stays, weatherData) {
-    const suggestions = {}; // category → Set of item names
+    // category → Map<itemName, dest>
+    // dest is a specific city name, or 'all' for universal items.
+    // If the same item is needed for multiple destinations it is
+    // automatically upgraded to 'all'.
+    const suggestions = {};
 
-    const add = (cat, item) => {
-      if (!suggestions[cat]) suggestions[cat] = new Set();
-      suggestions[cat].add(item);
+    const add = (cat, item, dest = 'all') => {
+      if (!suggestions[cat]) suggestions[cat] = new Map();
+      const existing = suggestions[cat].get(item);
+      if (existing === undefined) {
+        suggestions[cat].set(item, dest);
+      } else if (existing !== 'all' && existing !== dest) {
+        suggestions[cat].set(item, 'all'); // needed for multiple destinations
+      }
     };
 
-    // Use actual trip duration rather than summing individual stays
+    // Universal clothing based on trip length
     const _trip = tripsLoad().find(t => t.active) || tripsLoad()[0];
     const totalNights = (_trip?.from && _trip?.to)
       ? Math.max(1, Math.round((new Date(_trip.to) - new Date(_trip.from)) / 86400000))
       : Math.max(1, stays.reduce((s, x) => s + x.nights, 0));
-    // Cap at 7 — assume laundry on longer trips
     const qty = Math.min(totalNights + 1, 7);
 
-    // Core essentials only
     add('👕 Clothing', `T-shirts / casual tops (×${qty})`);
     add('👕 Clothing', `Underwear (×${qty})`);
     add('👕 Clothing', `Socks (×${qty})`);
-
-    // Track items suggested across stays to avoid duplicates
-    const suggested = new Set();
-    const once = (cat, item) => { if (!suggested.has(item)) { suggested.add(item); add(cat, item); } };
 
     stays.forEach(stay => {
       const wc = pkMatchWeatherCity(stay.city, weatherData.cities || []);
@@ -3924,44 +3922,39 @@
       const precip   = indices.map(i => daily.precipitation_sum?.[i] ?? 0);
       const codes    = indices.map(i => daily.weather_code?.[i] ?? 0);
 
-      const avgMax   = temps.length ? temps.reduce((a,b)=>a+b,0)/temps.length : null;
-      const avgMin   = mins.length  ? mins.reduce((a,b)=>a+b,0)/mins.length   : null;
-      const rainyDays= precip.filter(p => p > 3).length;
-      const hasSnow  = codes.some(c => c >= 71 && c <= 77);
+      const avgMax    = temps.length ? temps.reduce((a,b)=>a+b,0)/temps.length : null;
+      const avgMin    = mins.length  ? mins.reduce((a,b)=>a+b,0)/mins.length   : null;
+      const rainyDays = precip.filter(p => p > 3).length;
+      const hasSnow   = codes.some(c => c >= 71 && c <= 77);
 
-      const unit         = weatherData.unit === 'F' ? 'F' : 'C';
-      const hotThreshold = unit === 'F' ? 77 : 25;
-      const coldThreshold= unit === 'F' ? 46 : 8;
-      const coolThreshold= unit === 'F' ? 63 : 17;
+      const unit          = weatherData.unit === 'F' ? 'F' : 'C';
+      const hotThreshold  = unit === 'F' ? 77 : 25;
+      const coldThreshold = unit === 'F' ? 46 : 8;
+      const coolThreshold = unit === 'F' ? 63 : 17;
 
-      // Hot: swimwear + sun essentials only
       if (avgMax !== null && avgMax >= hotThreshold) {
-        once('👕 Clothing',    'Swimwear');
-        once('🧴 Toiletries',  'High-SPF sunscreen');
-        once('👜 Accessories', 'Sunglasses');
+        add('👕 Clothing',    'Swimwear',           stay.city);
+        add('🧴 Toiletries',  'High-SPF sunscreen', stay.city);
+        add('👜 Accessories', 'Sunglasses',         stay.city);
       }
 
-      // Cold: one jacket + one layer
       if (avgMin !== null && avgMin < coldThreshold) {
-        once('👕 Clothing', 'Heavy coat / jacket');
-        once('👕 Clothing', 'Warm layers');
+        add('👕 Clothing', 'Heavy coat / jacket', stay.city);
+        add('👕 Clothing', 'Warm layers',         stay.city);
       } else if (avgMax !== null && avgMax < coolThreshold) {
-        once('👕 Clothing', 'Light jacket / cardigan');
+        add('👕 Clothing', 'Light jacket / cardigan', stay.city);
       }
 
-      // Rain: only if 3+ rainy days
       if (rainyDays >= 3) {
-        once('👕 Clothing',    'Waterproof jacket / raincoat');
-        once('👜 Accessories', 'Compact travel umbrella');
+        add('👕 Clothing',    'Waterproof jacket / raincoat', stay.city);
+        add('👜 Accessories', 'Compact travel umbrella',      stay.city);
       }
 
-      // Snow
       if (hasSnow) {
-        once('👕 Clothing', 'Waterproof snow boots');
+        add('👕 Clothing', 'Waterproof snow boots', stay.city);
       }
     });
 
-    // Always useful travel items
     add('💊 Health & Medical', 'Travel insurance documents');
     add('💊 Health & Medical', 'Prescription medications');
     add('🔌 Tech & Cables',    'Universal travel adapter');
@@ -3989,16 +3982,19 @@
       let suggestRows = '';
       let totalNew = 0;
       Object.entries(suggestions).forEach(([cat, items]) => {
-        const newItems = [...items].filter(name => !existing.has(name.toLowerCase()));
+        const newItems = [...items.keys()].filter(name => !existing.has(name.toLowerCase()));
         if (!newItems.length) return;
         totalNew += newItems.length;
         suggestRows += `<div style="margin-bottom:6px;">
           <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;">${cat}</span>
           <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;">
-            ${newItems.map(name=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
-              <input type="checkbox" class="pk-suggest-cb" data-cat="${cat}" data-name="${name}" checked style="accent-color:var(--primary);">
-              ${name}
-            </label>`).join('')}
+            ${newItems.map(name => {
+              const dest = items.get(name);
+              return `<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+                <input type="checkbox" class="pk-suggest-cb" data-cat="${cat}" data-name="${name}" data-dest="${dest}" checked style="accent-color:var(--primary);">
+                ${name}
+              </label>`;
+            }).join('')}
           </div>
         </div>`;
       });
@@ -4059,17 +4055,24 @@
 
     let suggestRows = '';
     let totalNew = 0;
+    const multiDest = stays.length > 1;
     Object.entries(suggestions).forEach(([cat, items]) => {
-      const newItems = [...items].filter(name => !existing.has(name.toLowerCase()));
+      const newItems = [...items.keys()].filter(name => !existing.has(name.toLowerCase()));
       if (!newItems.length) return;
       totalNew += newItems.length;
       suggestRows += `<div style="margin-bottom:6px;">
         <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;">${cat}</span>
         <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;">
-          ${newItems.map(name=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" class="pk-suggest-cb" data-cat="${cat}" data-name="${name}" checked style="accent-color:var(--primary);">
-            ${name}
-          </label>`).join('')}
+          ${newItems.map(name => {
+            const dest  = items.get(name);
+            const badge = (multiDest && dest !== 'all')
+              ? ` <span style="font-size:10px;background:var(--primary-bg);color:var(--primary);border-radius:4px;padding:1px 5px;white-space:nowrap;">${pkEsc(dest)}</span>`
+              : '';
+            return `<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" class="pk-suggest-cb" data-cat="${cat}" data-name="${name}" data-dest="${pkEsc(dest)}" checked style="accent-color:var(--primary);">
+              ${name}${badge}
+            </label>`;
+          }).join('')}
         </div>
       </div>`;
     });
@@ -4115,7 +4118,8 @@
       }
       // Don't add duplicates
       if (!cat.items.find(i => i.name.toLowerCase() === name.toLowerCase())) {
-        cat.items.push({ id: 'pk-' + Date.now() + Math.random(), name, packed: false, dest: 'all' });
+        const dest = cb.dataset.dest || 'all';
+        cat.items.push({ id: 'pk-' + Date.now() + Math.random(), name, packed: false, dest });
       }
     });
     pkSave(data);
